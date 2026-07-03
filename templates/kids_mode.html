@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Kids Mode{% endblock %}
+{% block page_subtitle %}Other Menu / Kids Mode{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto">
+    <div class="grid grid-cols-1 gap-6">
+        <div class="bg-white rounded-[2rem] p-8 shadow-card">
+            <div class="flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 rounded-3xl bg-[#FFF3CD] flex items-center justify-center text-[#D39E00]">
+                            <i class="ph-bold ph-smiley text-3xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Welcome to Kids Mode</h2>
+                            <p class="text-sm text-slate-500 mt-1">A kid-friendly learning area with simpler navigation and playful content.</p>
+                        </div>
+                    </div>
+                    <div class="inline-flex items-center gap-2 rounded-full bg-[#E2F0FF] px-4 py-2 text-sm font-semibold text-[#1D4ED8]">
+                        <i class="ph-bold ph-star text-base"></i>
+                        Designed for younger learners
+                    </div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-[1.5rem] border border-[#F8E3C9] bg-[#FFFBF2] p-6">
+                        <h3 class="font-semibold text-lg text-slate-900">Safe learning</h3>
+                        <p class="text-sm text-slate-500 mt-2">Content is selected to be age-appropriate, gentle, and easy to follow.</p>
+                    </div>
+                    <div class="rounded-[1.5rem] border border-[#D9E9FF] bg-[#F5FBFF] p-6">
+                        <h3 class="font-semibold text-lg text-slate-900">Bright, simple design</h3>
+                        <p class="text-sm text-slate-500 mt-2">Large buttons, clear labels, and friendly colors keep navigation fun.</p>
+                    </div>
+                    <div class="rounded-[1.5rem] border border-[#DAF5DD] bg-[#F4FFEF] p-6">
+                        <h3 class="font-semibold text-lg text-slate-900">Parent-friendly</h3>
+                        <p class="text-sm text-slate-500 mt-2">Easy-to-access tools and controls for caregivers.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-[1.5rem] border border-[#E5E7EB] bg-[#F9FAFB] p-6">
+                    <h3 class="font-semibold text-lg text-slate-900">Want to expand Kids Mode?</h3>
+                    <p class="text-sm text-slate-500 mt-2">You can add curated courses, games, or a dedicated dashboard here for a more immersive kids experience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

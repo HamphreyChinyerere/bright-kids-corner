@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Calendar{% endblock %}
+{% block page_subtitle %}Plan lessons, exams, and your weekly study timetable{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6" id="calendar-app"
+     data-year="{{ year }}" data-month="{{ month }}"
+     data-csrf="{{ csrf_token }}">
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <!-- Interactive month calendar -->
+        <div class="xl:col-span-2 bg-white rounded-2xl shadow-card p-6">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-[#1A1A1A] tracking-tight">{{ month_name }} {{ year }}</h2>
+                    <p class="text-sm text-eduhive-muted mt-0.5">Click a day to view or add events</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a href="?year={{ prev_year }}&month={{ prev_month }}"
+                       class="w-9 h-9 rounded-full bg-gray-50 hover:bg-[#E67E66]/10 flex items-center justify-center text-eduhive-muted hover:text-[#E67E66] transition-colors">
+                        <i class="ph-bold ph-caret-left"></i>
+                    </a>
+                    <a href="?year={{ today.year }}&month={{ today.month }}&day={{ today.day }}"
+                       class="text-xs font-semibold text-[#E67E66] px-3 py-1.5 rounded-full bg-[#E67E66]/10 hover:bg-[#E67E66]/20 transition-colors">
+                        Today
+                    </a>
+                    <a href="?year={{ next_year }}&month={{ next_month }}"
+                       class="w-9 h-9 rounded-full bg-gray-50 hover:bg-[#E67E66]/10 flex items-center justify-center text-eduhive-muted hover:text-[#E67E66] transition-colors">
+                        <i class="ph-bold ph-caret-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="flex flex-wrap gap-3 mb-4 text-xs font-medium">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#E67E66]"></span> Lesson</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#F5A623]"></span> Assignment</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#C85D44]"></span> Exam</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-[#71717A]"></span> Reminder</span>
+                <span class="flex items-center gap-1.5"><span class="w-2 h-2 border border-[#C85D44] rounded-full"></span> Due date</span>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1 mb-1">
+                {% for label in weekday_labels %}
+                <div class="text-center text-xs font-semibold text-eduhive-muted py-2">{{ label }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="grid grid-cols-7 gap-1" id="cal-grid">
+                {% for week in calendar_weeks %}
+                    {% for day in week %}
+                    {% if day == 0 %}
+                    <div class="aspect-square rounded-xl bg-transparent"></div>
+                    {% else %}
+                    <button type="button"
+                            data-day="{{ day }}"
+                            class="cal-day aspect-square rounded-xl p-1.5 text-left flex flex-col transition-all border border-transparent
+                                   {% if day == today.day and month == today.month and year == today.year %}bg-[#E67E66] text-white ring-2 ring-[#E67E66]/30{% else %}bg-[#FDF3F1]/60 hover:bg-[#FDE2D9] text-[#1A1A1A]{% endif %}
+                                   {% if selected_day == day %}ring-2 ring-[#1A1A1A]{% endif %}">
+                        <span class="text-sm font-bold leading-none">{{ day }}</span>
+                    </button>
+                    {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+            <!-- Selected day panel -->
+            <div class="mt-6 pt-6 border-t border-eduhive-border">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-[#1A1A1A]" id="selected-day-title">Select a day</h3>
+                    <button type="button" id="btn-add-event"
+                            class="text-xs font-semibold bg-[#E67E66] text-white px-4 py-2 rounded-full hover:bg-[#D66D56] transition-colors hidden">
+                        <i class="ph-bold ph-plus"></i> Add event
+                    </button>
+                </div>
+                <div id="day-events-list" class="space-y-2 min-h-[60px]">
+                    <p class="text-sm text-eduhive-muted">Click a date on the calendar to see scheduled items.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: exam scheduler + quick add -->
+        <div class="space-y-6">
+            <!-- Exam scheduler -->
+            <div class="bg-white rounded-2xl shadow-card p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-[#C85D44]/10 flex items-center justify-center">
+                        <i class="ph-bold ph-exam text-[#C85D44] text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-[#1A1A1A]">Exam scheduler</h2>
+                        <p class="text-xs text-eduhive-muted">Schedule finals for enrolled courses</p>
+                    </div>
+                </div>
+                <form id="exam-scheduler-form" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-eduhive-muted mb-1">Course</label>
+                        <select name="linked_course_id" id="exam-course"
+                                class="w-full edu-input px-3 py-2.5 text-sm text-[#1A1A1A]">
+                            <option value="">General exam</option>
+                            {% for course in enrolled_courses %}
+                            <option value="{{ course.id }}">{{ course.title }}</option>
+                            {% empty %}
+                            <option value="" disabled>Enroll in a course first</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-eduhive-muted mb-1">Exam title</label>
+                        <input type="text" id="exam-title" placeholder="e.g. Python Coding — Final Exam"
+                               class="w-full edu-input px-3 py-2.5 text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-semibold text-eduhive-muted mb-1">Date</label>
+                            <input type="date" id="exam-date" required
+                                   class="w-full edu-input px-3 py-2.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-eduhive-muted mb-1">Time</label>
+                            <input type="time" id="exam-time" value="10:00" required
+                                   class="w-full edu-input px-3 py-2.5 text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-eduhive-muted mb-1">Duration (minutes)</label>
+                        <input type="number" id="exam-duration" value="90" min="15" step="15"
+                               class="w-full edu-input px-3 py-2.5 text-sm">
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-[#C85D44] text-white font-bold py-3 rounded-xl hover:opacity-90 transition-opacity">
+                        Schedule exam
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quick event -->
+            <div class="bg-white rounded-2xl shadow-card p-6">
+                <h2 class="font-bold text-[#1A1A1A] mb-4">Quick add event</h2>
+                <form id="quick-event-form" class="space-y-3">
+                    <input type="text" id="evt-title" placeholder="Event title" required
+                           class="w-full edu-input px-3 py-2.5 text-sm">
+                    <select id="evt-type" class="w-full edu-input px-3 py-2.5 text-sm">
+                        <option value="lesson">Lesson</option>
+                        <option value="assignment">Assignment</option>
+                        <option value="exam">Exam</option>
+                        <option value="reminder">Reminder</option>
+                        <option value="holiday">Holiday</option>
+                    </select>
+                    <select id="evt-course" class="w-full edu-input px-3 py-2.5 text-sm">
+                        <option value="">No linked course</option>
+                        {% for course in enrolled_courses %}
+                        <option value="{{ course.id }}">{{ course.title }}</option>
+                        {% endfor %}
+                    </select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="date" id="evt-date" required class="w-full edu-input px-3 py-2.5 text-sm">
+                        <input type="time" id="evt-time" value="14:00" class="w-full edu-input px-3 py-2.5 text-sm">
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-[#E67E66] text-white font-bold py-3 rounded-xl hover:bg-[#D66D56] transition-colors">
+                        Add to calendar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly timetable -->
+    <div class="bg-white rounded-2xl shadow-card p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+                <h2 class="text-lg font-bold text-[#1A1A1A]">Weekly timetable</h2>
+                <p class="text-sm text-eduhive-muted mt-0.5">Customize your recurring schedule — link blocks to enrolled courses</p>
+            </div>
+            <button type="button" id="btn-toggle-timetable-form"
+                    class="text-sm font-semibold text-[#E67E66] flex items-center gap-1 hover:underline">
+                <i class="ph-bold ph-plus-circle"></i> Add time block
+            </button>
+        </div>
+
+        <!-- Add / edit timetable form -->
+        <div id="timetable-form-panel" class="hidden mb-6 p-5 bg-[#FDF3F1] rounded-2xl border border-eduhive-border">
+            <h3 class="font-bold text-sm text-[#1A1A1A] mb-4" id="timetable-form-heading">New time block</h3>
+            <form id="timetable-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <input type="hidden" id="tt-slot-id" value="">
+                <div>
+                    <label class="block text-xs font-semibold text-eduhive-muted mb-1">Day</label>
+                    <select id="tt-weekday" class="w-full edu-input px-3 py-2.5 text-sm" required>
+                        <option value="0">Monday</option>
+                        <option value="1">Tuesday</option>
+                        <option value="2">Wednesday</option>
+                        <option value="3">Thursday</option>
+                        <option value="4">Friday</option>
+                        <option value="5">Saturday</option>
+                        <option value="6">Sunday</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-eduhive-muted mb-1">Type</label>
+                    <select id="tt-type" class="w-full edu-input px-3 py-2.5 text-sm">
+                        <option value="course">Course</option>
+                        <option value="study">Study</option>
+                        <option value="exam">Exam prep</option>
+                        <option value="break">Break</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-eduhive-muted mb-1">Start</label>
+                    <input type="time" id="tt-start" value="09:00" required class="w-full edu-input px-3 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-eduhive-muted mb-1">End</label>
+                    <input type="time" id="tt-end" value="10:00" required class="w-full edu-input px-3 py-2.5 text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-eduhive-muted mb-1">Title</label>
+                    <input type="text" id="tt-title" placeholder="e.g. Python study session" required
+                           class="w-full edu-input px-3 py-2.5 text-sm">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-eduhive-muted mb-1">Linked course (optional)</label>
+                    <select id="tt-course" class="w-full edu-input px-3 py-2.5 text-sm">
+                        <option value="">None</option>
+                        {% for course in enrolled_courses %}
+                        <option value="{{ course.id }}">{{ course.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="md:col-span-4 flex gap-2">
+                    <button type="submit" class="bg-[#E67E66] text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-[#D66D56] transition-colors">
+                        Save block
+                    </button>
+                    <button type="button" id="tt-cancel" class="text-eduhive-muted font-semibold px-5 py-2.5 rounded-xl hover:bg-white transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Timetable grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3" id="timetable-grid">
+            {% for label in weekday_labels %}
+            <div class="timetable-day-col rounded-2xl border border-eduhive-border bg-[#FDF3F1]/40 min-h-[140px] p-3"
+                 data-weekday="{{ forloop.counter0 }}">
+                <p class="text-xs font-bold uppercase tracking-wider text-eduhive-muted mb-3 text-center">{{ label }}</p>
+                <div class="tt-slots space-y-2" data-weekday="{{ forloop.counter0 }}"></div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Upcoming -->
+    {% if upcoming_events %}
+    <div class="bg-white rounded-2xl shadow-card p-6">
+        <h2 class="text-lg font-bold text-[#1A1A1A] mb-4">Coming up</h2>
+        <div class="space-y-3">
+            {% for event in upcoming_events %}
+            <div class="flex items-center gap-4 p-4 rounded-xl border border-eduhive-border hover:shadow-sm transition-shadow">
+                <div class="w-1 h-12 rounded-full shrink-0" style="background: {{ event.color|default:'#E67E66' }}"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm text-[#1A1A1A]">{{ event.title }}</p>
+                    <p class="text-xs text-eduhive-muted mt-0.5">
+                        {{ event.start_datetime|date:"l, M j · g:i A" }}
+                        {% if event.linked_course %} · {{ event.linked_course.title }}{% endif %}
+                    </p>
+                </div>
+                <span class="text-[10px] font-bold uppercase px-2 py-1 rounded-full text-white shrink-0"
+                      style="background: {% if event.event_type == 'exam' %}#C85D44{% elif event.event_type == 'assignment' %}#F5A623{% else %}#E67E66{% endif %}">
+                    {{ event.get_event_type_display }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Toast -->
+<div id="cal-toast" class="fixed bottom-6 right-6 bg-[#1A1A1A] text-white text-sm font-medium px-5 py-3.5 rounded-2xl shadow-xl z-50 translate-y-20 opacity-0 transition-all pointer-events-none"></div>
+
+{{ events_json|json_script:"events-data" }}
+{{ deadlines_json|json_script:"deadlines-data" }}
+{{ timetable_json|json_script:"timetable-data" }}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    const app = document.getElementById('calendar-app');
+    const year = parseInt(app.dataset.year, 10);
+    const month = parseInt(app.dataset.month, 10);
+    const csrf = app.dataset.csrf;
+
+    const events = JSON.parse(document.getElementById('events-data').textContent);
+    const deadlines = JSON.parse(document.getElementById('deadlines-data').textContent);
+    let timetable = JSON.parse(document.getElementById('timetable-data').textContent);
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let selectedDay = {{ selected_day|default:0 }};
+
+    const typeColors = {
+        lesson: '#E67E66',
+        assignment: '#F5A623',
+        exam: '#C85D44',
+        reminder: '#71717A',
+        holiday: '#8A8A8A',
+    };
+
+    function showToast(msg) {
+        const t = document.getElementById('cal-toast');
+        t.textContent = msg;
+        t.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 2800);
+    }
+
+    async function api(action, payload) {
+        const res = await fetch('{% url "calendar" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrf,
+            },
+            body: JSON.stringify({ action, ...payload }),
+        });
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message || 'Request failed');
+        return data;
+    }
+
+    function monthEvents(day) {
+        return events.filter(e => e.day === day);
+    }
+
+    function monthDeadlines(day) {
+        return deadlines.filter(d => d.day === day && d.month === month && d.year === year);
+    }
+
+    function paintCalendarDots() {
+        document.querySelectorAll('.cal-day[data-day]').forEach(btn => {
+            const day = parseInt(btn.dataset.day, 10);
+            const dots = [];
+            monthEvents(day).forEach(e => {
+                dots.push(`<span class="w-1.5 h-1.5 rounded-full" style="background:${e.color}" title="${e.title}"></span>`);
+            });
+            monthDeadlines(day).forEach(d => {
+                dots.push(`<span class="w-1.5 h-1.5 rounded-full border border-[#C85D44]" title="${d.title}"></span>`);
+            });
+            let wrap = btn.querySelector('.cal-dots-wrap');
+            if (!wrap) {
+                wrap = document.createElement('div');
+                wrap.className = 'cal-dots-wrap flex flex-wrap gap-0.5 mt-auto justify-center';
+                btn.appendChild(wrap);
+            }
+            wrap.innerHTML = dots.join('');
+        });
+    }
+
+    function renderDayPanel(day) {
+        selectedDay = day;
+        const title = document.getElementById('selected-day-title');
+        const list = document.getElementById('day-events-list');
+        const addBtn = document.getElementById('btn-add-event');
+
+        if (!day) {
+            title.textContent = 'Select a day';
+            list.innerHTML = '<p class="text-sm text-eduhive-muted">Click a date on the calendar to see scheduled items.</p>';
+            addBtn.classList.add('hidden');
+            return;
+        }
+
+        title.textContent = `${monthNames[month - 1]} ${day}, ${year}`;
+        addBtn.classList.remove('hidden');
+        document.getElementById('evt-date').value = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+
+        const items = [...monthEvents(day), ...monthDeadlines(day).map(d => ({
+            title: d.title + (d.is_exam ? ' (due)' : ' (due)'),
+            event_type: d.is_exam ? 'exam' : 'assignment',
+            color: d.is_exam ? '#C85D44' : '#F5A623',
+            description: d.course ? 'Course: ' + d.course : '',
+            id: null,
+            is_deadline: true,
+        }))];
+
+        if (!items.length) {
+            list.innerHTML = '<p class="text-sm text-eduhive-muted">No events on this day. Add one below or use the exam scheduler.</p>';
+            return;
+        }
+
+        list.innerHTML = items.map(item => `
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-[#FDF3F1] border border-eduhive-border">
+                <div class="w-1 self-stretch rounded-full shrink-0" style="background:${item.color}"></div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm text-[#1A1A1A]">${item.title}</p>
+                    ${item.start ? `<p class="text-xs text-eduhive-muted mt-0.5">${new Date(item.start).toLocaleString()}</p>` : ''}
+                    ${item.description ? `<p class="text-xs text-eduhive-muted">${item.description}</p>` : ''}
+                </div>
+                ${item.id ? `<button type="button" class="delete-event text-gray-400 hover:text-[#C85D44] p-1" data-id="${item.id}"><i class="ph-bold ph-trash"></i></button>` : ''}
+            </div>
+        `).join('');
+
+        list.querySelectorAll('.delete-event').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                await api('delete', { event_id: btn.dataset.id });
+                const idx = events.findIndex(e => e.id == btn.dataset.id);
+                if (idx >= 0) events.splice(idx, 1);
+                paintCalendarDots();
+                renderDayPanel(day);
+                showToast('Event removed');
+            });
+        });
+    }
+
+    document.querySelectorAll('.cal-day[data-day]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.cal-day').forEach(b => b.classList.remove('ring-2', 'ring-[#1A1A1A]'));
+            btn.classList.add('ring-2', 'ring-[#1A1A1A]');
+            renderDayPanel(parseInt(btn.dataset.day, 10));
+        });
+    });
+
+    document.getElementById('btn-add-event')?.addEventListener('click', () => {
+        document.getElementById('evt-title').focus();
+    });
+
+    document.getElementById('quick-event-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dateVal = document.getElementById('evt-date').value;
+        const timeVal = document.getElementById('evt-time').value;
+        const start = `${dateVal}T${timeVal}:00`;
+        const type = document.getElementById('evt-type').value;
+        await api('create', {
+            title: document.getElementById('evt-title').value,
+            event_type: type,
+            start_datetime: start,
+            linked_course_id: document.getElementById('evt-course').value || null,
+            color: typeColors[type],
+        });
+        showToast('Event added — reloading…');
+        setTimeout(() => location.reload(), 600);
+    });
+
+    document.getElementById('exam-scheduler-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dateVal = document.getElementById('exam-date').value;
+        const timeVal = document.getElementById('exam-time').value;
+        const courseId = document.getElementById('exam-course').value;
+        let title = document.getElementById('exam-title').value;
+        if (!title && courseId) {
+            const opt = document.getElementById('exam-course').selectedOptions[0];
+            title = opt.text + ' — Final Exam';
+        }
+        await api('schedule_exam', {
+            title: title || 'Scheduled Exam',
+            start_datetime: `${dateVal}T${timeVal}:00`,
+            duration_minutes: document.getElementById('exam-duration').value,
+            linked_course_id: courseId || null,
+        });
+        showToast('Exam scheduled — reloading…');
+        setTimeout(() => location.reload(), 600);
+    });
+
+    const weekdayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+    function renderTimetable() {
+        document.querySelectorAll('.tt-slots').forEach(col => { col.innerHTML = ''; });
+        timetable.sort((a, b) => a.weekday - b.weekday || a.start_time.localeCompare(b.start_time));
+        timetable.forEach(slot => {
+            const col = document.querySelector(`.tt-slots[data-weekday="${slot.weekday}"]`);
+            if (!col) return;
+            const el = document.createElement('div');
+            el.className = 'p-2.5 rounded-xl text-white text-xs shadow-sm group relative';
+            el.style.background = slot.color;
+            el.innerHTML = `
+                <p class="font-bold leading-tight">${slot.title}</p>
+                <p class="opacity-90 mt-0.5">${slot.start_time} – ${slot.end_time}</p>
+                ${slot.course ? `<p class="opacity-80 mt-1 truncate">${slot.course}</p>` : ''}
+                <div class="absolute top-1 right-1 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button type="button" class="tt-edit w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center" data-id="${slot.id}"><i class="ph-bold ph-pencil-simple text-[10px]"></i></button>
+                    <button type="button" class="tt-del w-6 h-6 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center" data-id="${slot.id}"><i class="ph-bold ph-trash text-[10px]"></i></button>
+                </div>
+            `;
+            col.appendChild(el);
+        });
+        document.querySelectorAll('.tt-edit').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const slot = timetable.find(s => s.id == btn.dataset.id);
+                if (!slot) return;
+                document.getElementById('timetable-form-panel').classList.remove('hidden');
+                document.getElementById('timetable-form-heading').textContent = 'Edit time block';
+                document.getElementById('tt-slot-id').value = slot.id;
+                document.getElementById('tt-weekday').value = slot.weekday;
+                document.getElementById('tt-type').value = slot.slot_type;
+                document.getElementById('tt-start').value = slot.start_time;
+                document.getElementById('tt-end').value = slot.end_time;
+                document.getElementById('tt-title').value = slot.title;
+            });
+        });
+        document.querySelectorAll('.tt-del').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                await api('delete_timetable', { slot_id: btn.dataset.id });
+                timetable = timetable.filter(s => s.id != btn.dataset.id);
+                renderTimetable();
+                showToast('Block removed');
+            });
+        });
+    }
+
+    document.getElementById('btn-toggle-timetable-form').addEventListener('click', () => {
+        const panel = document.getElementById('timetable-form-panel');
+        panel.classList.toggle('hidden');
+        if (!panel.classList.contains('hidden')) {
+            document.getElementById('tt-slot-id').value = '';
+            document.getElementById('timetable-form-heading').textContent = 'New time block';
+        }
+    });
+
+    document.getElementById('tt-cancel').addEventListener('click', () => {
+        document.getElementById('timetable-form-panel').classList.add('hidden');
+    });
+
+    document.getElementById('timetable-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const slotId = document.getElementById('tt-slot-id').value;
+        const payload = {
+            weekday: document.getElementById('tt-weekday').value,
+            slot_type: document.getElementById('tt-type').value,
+            start_time: document.getElementById('tt-start').value,
+            end_time: document.getElementById('tt-end').value,
+            title: document.getElementById('tt-title').value,
+            course_id: document.getElementById('tt-course').value || null,
+        };
+        if (slotId) {
+            await api('update_timetable', { slot_id: slotId, ...payload });
+            const s = timetable.find(x => x.id == slotId);
+            if (s) Object.assign(s, payload, { start_time: payload.start_time, end_time: payload.end_time });
+            showToast('Block updated');
+        } else {
+            const res = await api('create_timetable', payload);
+            timetable.push({
+                id: res.slot_id,
+                weekday: parseInt(payload.weekday, 10),
+                title: payload.title,
+                start_time: payload.start_time,
+                end_time: payload.end_time,
+                slot_type: payload.slot_type,
+                color: { course:'#E67E66', study:'#71717A', exam:'#C85D44', break:'#8A8A8A', custom:'#F5A623' }[payload.slot_type],
+                course: document.getElementById('tt-course').selectedOptions[0]?.text || '',
+            });
+            showToast('Block added');
+        }
+        document.getElementById('timetable-form-panel').classList.add('hidden');
+        renderTimetable();
+    });
+
+    // Fix timetable column headers
+    document.querySelectorAll('.timetable-day-col').forEach((col, i) => {
+        const label = col.querySelector('p');
+        if (label) label.textContent = weekdayLabels[i];
+    });
+
+    paintCalendarDots();
+    renderTimetable();
+    if (selectedDay) {
+        const btn = document.querySelector(`.cal-day[data-day="${selectedDay}"]`);
+        if (btn) btn.click();
+    }
+
+    const today = new Date();
+    if (!document.getElementById('exam-date').value) {
+        document.getElementById('exam-date').valueAsDate = today;
+    }
+    if (!document.getElementById('evt-date').value) {
+        document.getElementById('evt-date').value = `${year}-${String(month).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+
+{% block header_title %}Certifications{% endblock %}
+{% block page_subtitle %}Your earned credentials and courses in progress{% endblock %}
+
+{% block content %}
+<div class="max-w-[1000px] mx-auto space-y-6">
+
+    <div class="bg-white rounded-2xl shadow-card p-6 md:p-8">
+        <div class="flex items-start gap-4 mb-6">
+            <div class="w-12 h-12 rounded-2xl bg-[#E67E66]/10 flex items-center justify-center shrink-0">
+                <i class="ph-bold ph-certificate text-[#E67E66] text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-[#1A1A1A]">Official certificates</h2>
+                <p class="text-sm text-eduhive-muted mt-1">
+                    Complete a course to earn a verified certificate. Download and share your achievements anytime.
+                </p>
+            </div>
+        </div>
+
+        {% if certificates %}
+        <div class="space-y-4">
+            {% for cert in certificates %}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FDF3F1] border border-eduhive-border rounded-2xl p-5">
+                <div>
+                    <h3 class="font-bold text-[#1A1A1A]">{{ cert.course_name }}</h3>
+                    <p class="text-xs text-eduhive-muted mt-1">
+                        <i class="ph-bold ph-calendar-blank"></i>
+                        Issued {{ cert.date_issued|date:"F j, Y" }}
+                    </p>
+                </div>
+                <a href="{% url 'certificate_export' cert.token %}" target="_blank"
+                   class="inline-flex items-center justify-center gap-2 bg-[#E67E66] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#D66D56] transition-colors shrink-0">
+                    <i class="ph-bold ph-download-simple"></i>
+                    Download PDF
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-12 border border-dashed border-eduhive-border rounded-2xl bg-[#FDF3F1]/50">
+            <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <i class="ph-bold ph-scroll text-[#E67E66] text-3xl"></i>
+            </div>
+            <p class="font-semibold text-[#1A1A1A]">No certificates yet</p>
+            <p class="text-sm text-eduhive-muted mt-1 max-w-sm mx-auto">
+                Finish a course to unlock your first official certificate here.
+            </p>
+            <a href="{% url 'course_list' %}"
+               class="inline-block mt-4 bg-[#E67E66] text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-[#D66D56] transition-colors">
+                Browse courses
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if in_progress_courses %}
+    <div class="bg-white rounded-2xl shadow-card p-6 md:p-8">
+        <h2 class="text-lg font-bold text-[#1A1A1A] mb-1">Working toward certification</h2>
+        <p class="text-sm text-eduhive-muted mb-5">Complete these courses to earn your next certificate.</p>
+        <div class="space-y-3">
+            {% for enrollment in in_progress_courses %}
+            <a href="{% url 'course_detail' slug=enrollment.course.slug %}"
+               class="flex items-center gap-4 p-4 rounded-xl border border-eduhive-border hover:shadow-sm transition-shadow group">
+                <img src="{{ enrollment.course|course_thumbnail_url }}"
+                     alt="{{ enrollment.course.title }}"
+                     class="w-14 h-14 rounded-xl object-cover shrink-0">
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-sm text-[#1A1A1A] truncate group-hover:text-[#E67E66] transition-colors">
+                        {{ enrollment.course.title }}
+                    </p>
+                    <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mt-2 max-w-xs">
+                        <div class="h-full bg-[#E67E66] rounded-full"
+                             style="width: {{ enrollment.progress_percent }}%"></div>
+                    </div>
+                </div>
+                <span class="text-sm font-bold text-[#E67E66] shrink-0">{{ enrollment.progress_percent }}%</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block header_title %}{{ game.title }}{% endblock %}
+{% block page_subtitle %}{{ game.get_game_type_display }} — interactive module sandbox{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-12rem)] bg-[#FDF3F1] p-6 font-sans -m-8">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-eduhive-border shadow-card flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-[#1A1A1A]">{{ game.title }}</h2>
+                <span class="bg-[#FDF3F1] text-[#D05A3F] px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                    {{ game.get_game_type_display }}
+                </span>
+            </div>
+
+            <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-black border border-eduhive-border">
+                <iframe
+                    src="{{ game.embed_url }}"
+                    class="absolute top-0 left-0 w-full h-full border-0"
+                    allow="autoplay; fullscreen"
+                    allowfullscreen
+                    loading="lazy"
+                    title="{{ game.title }}">
+                </iframe>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-eduhive-border shadow-card flex flex-col justify-between">
+            <div>
+                <h3 class="text-lg font-bold text-[#1A1A1A] mb-3">Project Objective</h3>
+                <p class="text-sm text-eduhive-muted leading-relaxed mb-6">
+                    {{ game.description|default:"Analyze the logic architecture of this application module. Modify parameters inside the canvas to complete the required challenge loop." }}
+                </p>
+
+                {% if game.module %}
+                <p class="text-xs text-eduhive-muted mb-4">
+                    <i class="ph-bold ph-book-open text-[#E67E66]"></i>
+                    {{ game.module.course.title }} — {{ game.module.title }}
+                </p>
+                {% endif %}
+
+                <h4 class="text-xs font-bold uppercase tracking-wider text-eduhive-muted-light mb-3">Key Architectural Concepts</h4>
+                <ul class="space-y-3">
+                    <li class="flex items-center text-sm text-[#1A1A1A]">
+                        <span class="w-2 h-2 bg-[#D05A3F] rounded-full mr-3 shrink-0"></span>
+                        Coordinate Space Logic (X/Y-Axis Traversal)
+                    </li>
+                    <li class="flex items-center text-sm text-[#1A1A1A]">
+                        <span class="w-2 h-2 bg-[#D05A3F] rounded-full mr-3 shrink-0"></span>
+                        {% if game.game_type == 'scratch' %}Visual Event Blocks &amp; Flags{% else %}Functional Loops &amp; Execution Canvas{% endif %}
+                    </li>
+                </ul>
+            </div>
+
+            <div class="pt-4 border-t border-eduhive-border">
+                <a href="{{ return_url }}"
+                   class="block text-center bg-[#D05A3F] hover:bg-[#b84e35] text-white font-medium text-sm py-3 rounded-xl transition-all">
+                    Return to Course Workspace
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

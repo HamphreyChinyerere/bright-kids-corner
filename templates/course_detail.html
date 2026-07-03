@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6" >
+    
+    <!-- Top Header -->
+    <header class="bg-[#FFFFFF] border border-eduhive-border rounded-2xl p-6 mb-8 flex justify-between items-center shadow-sm">
+        <div>
+            <a href="{% url 'course_list' %}" class="text-sm font-bold text-[#C85D44] hover:underline mb-2 inline-block">← Back to Registry</a>
+            <h1 class=" text-3xl font-bold">{{ lesson.course.title }} - {{ lesson.title }}</h1>
+        </div>
+        <div class="bg-[#E67E66] text-white border border-eduhive-border px-4 py-2 rounded-xl font-bold shadow-sm">
+            ⭐ <span id="user-points">{{ user.progress.total_points_earned|default:0 }}</span> Points
+        </div>
+    </header>
+
+    <!-- Split Screen Layout -->
+    <div class="flex flex-col lg:flex-row gap-8 h-full">
+        
+        <!-- Left Partition: Video Shell -->
+        <div class="w-full lg:w-2/3 flex flex-col">
+            <div class="bg-black border border-eduhive-border rounded-2xl overflow-hidden shadow-card aspect-video relative flex-shrink-0">
+                {% if lesson.video_url %}
+                <!-- Custom HTML5 Video Shell -->
+                <video controls class="w-full h-full object-cover">
+                    <source src="{{ lesson.video_url }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                {% else %}
+                <div class="absolute inset-0 flex items-center justify-center bg-[#1A1A1A]">
+                    <span class="text-white  text-2xl">Video Unavailable</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="mt-6 bg-[#FFFFFF] border border-eduhive-border rounded-2xl p-6 shadow-sm">
+                <h3 class=" text-xl font-bold mb-2">Lesson Info</h3>
+                <p class="text-sm leading-relaxed">Watch the tutorial closely and complete the interactive tasks on the right to earn points and advance to the next level!</p>
+            </div>
+        </div>
+
+        <!-- Right Partition: Checklist -->
+        <div class="w-full lg:w-1/3">
+            <div class="bg-[#FFFFFF] border border-eduhive-border rounded-2xl p-6 shadow-sm h-full flex flex-col">
+                <h2 class=" text-2xl font-bold mb-6 flex items-center">
+                    <span class="mr-2">📋</span> Task Checklist
+                </h2>
+                
+                <div class="space-y-4 flex-1 overflow-y-auto pr-2">
+                    {% for item in tasks_with_status %}
+                    <label class="flex items-start space-x-4 p-4 border border-eduhive-border rounded-xl cursor-pointer hover:bg-[#FDF3F1] transition-colors {% if item.is_completed %}bg-[#FDF3F1] opacity-75{% endif %}">
+                        <div class="relative flex items-center mt-1">
+                            <input type="checkbox" class="task-checkbox peer appearance-none w-[24px] h-[24px] border border-eduhive-border rounded bg-white checked:bg-[#E67E66]/15 transition-colors" data-task-id="{{ item.task.id }}" {% if item.is_completed %}checked disabled{% endif %}>
+                            <svg class="absolute inset-0 w-[24px] h-[24px] text-[#1A1A1A] pointer-events-none opacity-0 peer-checked:opacity-100 p-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                        <span class="font-bold text-sm leading-snug pt-1 {% if item.is_completed %}line-through text-slate-500{% endif %}">{{ item.task.instruction }}</span>
+                    </label>
+                    {% empty %}
+                    <p class="text-sm font-bold text-slate-500 italic">No tasks for this lesson.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkboxes = document.querySelectorAll('.task-checkbox');
+        const pointsDisplay = document.getElementById('user-points');
+        const csrfToken = '{{ csrf_token }}';
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    const taskId = this.dataset.taskId;
+                    const label = this.closest('label');
+                    const span = label.querySelector('span:last-child');
+                    
+                    // Disable checkbox to prevent multiple clicks
+                    this.disabled = true;
+
+                    fetch('', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: JSON.stringify({ task_id: taskId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Visually mark as complete
+                            label.classList.add('bg-[#FDF3F1]', 'opacity-75');
+                            span.classList.add('line-through', 'text-slate-500');
+                            
+                            // Update points
+                            if (pointsDisplay && data.points) {
+                                pointsDisplay.textContent = data.points;
+                                // Simple bounce animation on points update
+                                pointsDisplay.closest('div').classList.add('animate-bounce');
+                                setTimeout(() => {
+                                    pointsDisplay.closest('div').classList.remove('animate-bounce');
+                                }, 1000);
+                            }
+                        } else {
+                            // Revert on error
+                            this.checked = false;
+                            this.disabled = false;
+                            console.error('Error logging task:', data.message);
+                        }
+                    })
+                    .catch(err => {
+                        this.checked = false;
+                        this.disabled = false;
+                        console.error('Fetch error:', err);
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock content %}

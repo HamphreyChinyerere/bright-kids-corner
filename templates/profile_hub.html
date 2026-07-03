@@ -1,0 +1,409 @@
+{% extends 'base.html' %}
+
+{% block header_title %}My Profile{% endblock %}
+{% block page_subtitle %}Dashboard / Profile{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- ── LEFT: Profile Form (2/3 width) ─────────────────────────── -->
+        <div class="lg:col-span-2 space-y-5">
+
+            <!-- Profile Card -->
+            <div class="bg-white rounded-2xl p-8 shadow-card relative">
+
+                <!-- Edit icon -->
+                <button class="absolute top-6 right-6 w-8 h-8 rounded-full bg-gray-50 hover:bg-[#E67E66]/10 flex items-center justify-center text-gray-400 hover:text-[#E67E66] transition-colors"
+                        onclick="toggleEdit()">
+                    <i class="ph-bold ph-pencil-simple text-base" id="edit-icon"></i>
+                </button>
+
+                <!-- Avatar -->
+                <div class="flex flex-col items-center mb-8">
+                    <div class="relative">
+                        <div class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-[#E67E66]/20 shadow-lg">
+                            <img src="https://i.pravatar.cc/150?u={{ user.username }}"
+                                 alt="Avatar" class="w-full h-full object-cover" id="avatar-img">
+                        </div>
+                        <button type="button"
+                                onclick="document.getElementById('avatar-upload').click()"
+                                class="absolute bottom-0 right-0 w-7 h-7 bg-[#E67E66] rounded-full flex items-center justify-center shadow-md hover:bg-[#D66D56] transition-colors">
+                            <i class="ph-bold ph-camera text-white text-xs"></i>
+                        </button>
+                        <input type="file" id="avatar-upload" accept="image/*" class="hidden">
+                    </div>
+                    <h3 class="font-bold text-lg text-[#1A1A1A] mt-3">
+                        {{ user.first_name|default:user.username }} {{ user.last_name }}
+                    </h3>
+                    <p class="text-sm text-gray-400">{{ user.email|default:"No email set" }}</p>
+                </div>
+
+                <!-- Personal Information -->
+                <form method="POST" id="profile-form">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-bold text-[#1A1A1A]">Personal Information</h4>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">First Name</label>
+                                <input type="text" name="first_name" value="{{ user.first_name }}"
+                                       class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                       placeholder="First name" disabled>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Last Name</label>
+                                <input type="text" name="last_name" value="{{ user.last_name }}"
+                                       class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                       placeholder="Last name" disabled>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Contact</label>
+                                <input type="text" name="contact"
+                                       class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                       placeholder="+1 012-345-6789" disabled>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Email</label>
+                                <input type="email" name="email" value="{{ user.email }}"
+                                       class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                       placeholder="email@example.com" disabled>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Address</label>
+                            <input type="text" name="address"
+                                   class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                   placeholder="Your address" disabled>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Gender</label>
+                                <select name="gender"
+                                        class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                        disabled>
+                                    <option>Select gender</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Prefer not to say</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Birthday</label>
+                                <input type="date" name="birthday"
+                                       class="profile-input edu-input w-full px-4 py-3 text-sm font-medium text-[#1A1A1A] transition-all disabled:opacity-70 disabled:text-gray-500"
+                                       disabled>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Save button (hidden until edit mode) -->
+                    <button type="submit" id="save-btn"
+                            class="hidden w-full bg-[#E67E66] text-white py-3.5 rounded-xl font-bold shadow-md shadow-[#E67E66]/30 hover:bg-[#D66D56] hover:-translate-y-0.5 transition-all">
+                        <i class="ph-bold ph-floppy-disk mr-2"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+
+            <!-- Security Information -->
+            <div class="bg-white rounded-2xl p-6 shadow-card">
+                <div class="flex items-center justify-between mb-5">
+                    <h4 class="font-bold text-[#1A1A1A]">Security Information</h4>
+                    <button class="w-8 h-8 rounded-full bg-gray-50 hover:bg-[#E67E66]/10 flex items-center justify-center text-gray-400 hover:text-[#E67E66] transition-colors">
+                        <i class="ph-bold ph-pencil-simple text-base"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Password</label>
+                        <input type="password" value="••••••••"
+                               class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium text-gray-400"
+                               disabled>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Recovery Email</label>
+                        <input type="email" value="{{ user.email|default:'Not set' }}"
+                               class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-sm font-medium text-gray-400"
+                               disabled>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <i class="ph-bold ph-shield-check text-green-500 text-xl flex-shrink-0"></i>
+                    <div>
+                        <p class="text-xs font-semibold text-green-700">Account Secured</p>
+                        <p class="text-xs text-green-500 mt-0.5">Two-factor authentication is available in settings.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Hours Chart -->
+            <div class="bg-white rounded-2xl p-6 shadow-card">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h4 class="font-bold text-[#1A1A1A]">Platform Training Hours</h4>
+                        <p class="text-xs text-gray-400 mt-0.5">Your weekly activity at a glance</p>
+                    </div>
+                    <span class="text-xs bg-[#E67E66]/10 text-[#E67E66] font-semibold px-3 py-1.5 rounded-full">This Week</span>
+                </div>
+
+                <div class="flex items-end justify-between gap-2 h-40 relative pt-6 border-b border-gray-100 mb-4">
+                    <!-- Gridlines -->
+                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-0">
+                        {% for i in "12345" %}
+                        <div class="w-full border-t border-gray-50"></div>
+                        {% endfor %}
+                    </div>
+
+                    {% for stat in training_hours %}
+                    <div class="flex flex-col items-center flex-1 group relative">
+                        <!-- Tooltip -->
+                        <div class="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-white text-[10px] font-bold px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {{ stat.hours }}h
+                        </div>
+                        <div class="w-full max-w-[32px] rounded-t-lg transition-all duration-300 group-hover:bg-[#E67E66] cursor-pointer
+                                    {% if stat.hours == 0 %}bg-gray-100{% else %}bg-[#E67E66]/30{% endif %}"
+                             style="height: {{ stat.height }}"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Day labels -->
+                <div class="flex justify-between">
+                    {% for stat in training_hours %}
+                    <div class="flex-1 text-center text-xs font-medium text-gray-400">{{ stat.day }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── RIGHT: Widgets (1/3 width) ─────────────────────────────── -->
+        <div class="space-y-5">
+
+            <!-- Time Spend Chart -->
+            <div class="bg-white rounded-2xl p-5 shadow-card">
+                <h4 class="font-bold text-[#1A1A1A] text-sm mb-4">Time Spent</h4>
+                <div class="flex items-end justify-between gap-1 h-24 mb-3">
+                    {% for stat in training_hours %}
+                    <div class="flex flex-col items-center flex-1 group">
+                        <div class="w-full max-w-[18px] rounded-full transition-all duration-300 group-hover:bg-[#E67E66] cursor-pointer
+                                    {% if stat.day == 'Wed' %}bg-[#E67E66]{% else %}bg-[#E67E66]/25{% endif %}"
+                             style="height: {{ stat.height }}"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="flex justify-between">
+                    {% for stat in training_hours %}
+                    <div class="flex-1 text-center text-[10px] font-semibold
+                                {% if stat.day == 'Wed' %}text-[#E67E66]{% else %}text-gray-300{% endif %}">
+                        {{ stat.day|slice:":1" }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- My Activity Ring -->
+            <div class="bg-white rounded-2xl p-5 shadow-card text-center">
+                <h4 class="font-bold text-[#1A1A1A] text-sm mb-4">My Activity</h4>
+                <!-- SVG Donut Ring -->
+                <div class="relative inline-flex items-center justify-center mb-3">
+                    <svg width="100" height="100" viewBox="0 0 100 100" class="-rotate-90">
+                        <!-- Background ring -->
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#F3F4F6" stroke-width="10"/>
+                        <!-- Progress ring (40% = 238.76 circumference * 0.40 ≈ 95.5) -->
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#F5A623" stroke-width="10"
+                                stroke-dasharray="95.5 143.3" stroke-linecap="round"/>
+                        <!-- Inner accent -->
+                        <circle cx="50" cy="50" r="28" fill="none" stroke="#FDF3F1" stroke-width="6"/>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-xl font-bold text-[#1A1A1A]">40%</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400">Better this week</p>
+                <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+                    <div>
+                        <p class="text-sm font-bold text-[#1A1A1A]">{{ progress.streak_days|default:0 }}</p>
+                        <p class="text-[10px] text-gray-400">Streak</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-[#1A1A1A]">{{ progress.total_points_earned|default:0 }}</p>
+                        <p class="text-[10px] text-gray-400">Points</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-[#1A1A1A]">{{ progress.current_node_index|default:1 }}</p>
+                        <p class="text-[10px] text-gray-400">Stage</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Calendar -->
+            <div class="bg-white rounded-2xl p-5 shadow-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-bold text-[#1A1A1A] text-sm" id="mini-cal-title">Loading...</h4>
+                    <div class="flex items-center gap-1">
+                        <button onclick="miniCalNav(-1)"
+                                class="w-6 h-6 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#E67E66] transition-colors">
+                            <i class="ph-bold ph-caret-left text-xs"></i>
+                        </button>
+                        <button onclick="miniCalNav(1)"
+                                class="w-6 h-6 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#E67E66] transition-colors">
+                            <i class="ph-bold ph-caret-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Day headers -->
+                <div class="grid grid-cols-7 mb-2">
+                    {% for d in "SMTWTFS" %}
+                    <div class="text-center text-[10px] font-semibold text-gray-400">{{ d }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Calendar grid (JS rendered) -->
+                <div id="mini-cal-grid" class="grid grid-cols-7 gap-y-1 text-center text-xs"></div>
+
+                <div class="mt-4 pt-3 border-t border-gray-100">
+                    <a href="{% url 'calendar' %}"
+                       class="flex items-center justify-center gap-2 text-xs font-semibold text-[#E67E66] hover:underline">
+                        <i class="ph-bold ph-calendar-dots"></i> Open Full Calendar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="bg-white rounded-2xl p-5 shadow-card">
+                <h4 class="font-bold text-[#1A1A1A] text-sm mb-4">Quick Links</h4>
+                <div class="space-y-2">
+                    <a href="{% url 'rewards_vault' %}"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <i class="ph-bold ph-trophy text-yellow-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-600 group-hover:text-[#E67E66]">Rewards Vault</span>
+                        <i class="ph-bold ph-caret-right text-gray-300 text-sm ml-auto"></i>
+                    </a>
+                    <a href="{% url 'course_list' %}"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="ph-bold ph-book-open text-blue-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-600 group-hover:text-[#E67E66]">My Courses</span>
+                        <i class="ph-bold ph-caret-right text-gray-300 text-sm ml-auto"></i>
+                    </a>
+                    <a href="{% url 'games_library' %}"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="ph-bold ph-game-controller text-purple-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-600 group-hover:text-[#E67E66]">Games Library</span>
+                        <i class="ph-bold ph-caret-right text-gray-300 text-sm ml-auto"></i>
+                    </a>
+                    <a href="{% url 'vr_portal' %}"
+                       class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <i class="ph-bold ph-head-circuit text-indigo-500 text-sm"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-600 group-hover:text-[#E67E66]">VR Portal</span>
+                        <i class="ph-bold ph-caret-right text-gray-300 text-sm ml-auto"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+// ── Edit Mode Toggle ────────────────────────────────────────────────────
+function toggleEdit() {
+    const inputs = document.querySelectorAll('.profile-input');
+    const saveBtn = document.getElementById('save-btn');
+    const icon    = document.getElementById('edit-icon');
+    const isDisabled = inputs[0].disabled;
+
+    inputs.forEach(input => {
+        input.disabled = !isDisabled;
+        if (!isDisabled) {
+            input.classList.add('bg-gray-50');
+            input.classList.remove('bg-white', 'border-[#E67E66]/50');
+        } else {
+            input.classList.remove('bg-gray-50');
+            input.classList.add('bg-white', 'border-[#E67E66]/50');
+        }
+    });
+
+    saveBtn.classList.toggle('hidden', !isDisabled);
+    icon.className = isDisabled
+        ? 'ph-bold ph-x text-base text-[#E67E66]'
+        : 'ph-bold ph-pencil-simple text-base';
+}
+
+// ── Avatar Preview ──────────────────────────────────────────────────────
+document.getElementById('avatar-upload').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+        document.getElementById('avatar-img').src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+// ── Mini Calendar ───────────────────────────────────────────────────────
+let miniCal = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
+function renderMiniCal() {
+    const { year, month } = miniCal;
+    const today     = new Date();
+    const firstDay  = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthNames  = ['January','February','March','April','May','June',
+                         'July','August','September','October','November','December'];
+
+    document.getElementById('mini-cal-title').textContent = `${monthNames[month]}, ${year}`;
+
+    const grid = document.getElementById('mini-cal-grid');
+    grid.innerHTML = '';
+
+    // Empty cells before first day
+    for (let i = 0; i < firstDay; i++) {
+        const el = document.createElement('div');
+        el.className = 'text-gray-200 py-1 text-[11px]';
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        el.textContent = prevMonthDays - firstDay + i + 1;
+        grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const el   = document.createElement('div');
+        const isToday = (d === today.getDate() && month === today.getMonth() && year === today.getFullYear());
+        el.className = `py-1 text-[11px] font-medium rounded-full cursor-pointer transition-colors
+            ${isToday
+                ? 'bg-[#E67E66] text-white w-6 h-6 flex items-center justify-center mx-auto'
+                : 'text-gray-600 hover:bg-[#E67E66]/10 hover:text-[#E67E66]'}`;
+        el.textContent = d;
+        grid.appendChild(el);
+    }
+}
+
+function miniCalNav(dir) {
+    miniCal.month += dir;
+    if (miniCal.month > 11) { miniCal.month = 0;  miniCal.year++; }
+    if (miniCal.month < 0)  { miniCal.month = 11; miniCal.year--; }
+    renderMiniCal();
+}
+
+document.addEventListener('DOMContentLoaded', renderMiniCal);
+</script>
+{% endblock %}

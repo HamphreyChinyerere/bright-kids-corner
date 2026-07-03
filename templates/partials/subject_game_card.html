@@ -1,0 +1,12 @@
+<div class="bg-white rounded-xl p-6 shadow-sm border border-[#F5E4DC] dark:bg-neutral-900 dark:border-neutral-800 edu-card h-full flex flex-col">
+    <div class="flex justify-between items-center mb-4">
+        <span class="bg-[#FDE2D9] text-[#C85D44] px-3 py-1 rounded-full text-xs font-semibold">{{ subject.label }}</span>
+        <span class="text-eduhive-muted-light dark:text-neutral-500 text-xs">{{ subject.age_display }}</span>
+    </div>
+    <h3 class="text-lg font-bold text-[#1A1A1A] dark:text-white mb-2">{{ subject.title }}</h3>
+    <p class="text-sm text-eduhive-muted dark:text-neutral-400 mb-4 flex-1">{{ subject.description }}</p>
+    <a href="{{ subject.educational_game_url }}" target="_blank" rel="noopener noreferrer"
+       class="inline-block bg-[#E67E66] hover:bg-[#D66D56] text-white font-medium text-sm px-4 py-2 rounded-lg transition">
+        Launch Interactive Lab
+    </a>
+</div>

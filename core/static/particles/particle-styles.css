@@ -1,0 +1,47 @@
+/* Particle background styles - app static copy */
+.particle-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1; /* behind the auth card which will be z-index:5 */
+  pointer-events: none; /* allow clicks through empty space */
+  overflow: hidden;
+}
+
+#auth-card {
+  position: relative;
+  z-index: 5; /* above particle layer */
+}
+
+.particle {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition: transform 250ms linear, opacity 250ms linear;
+  pointer-events: auto; /* allow hover on particles */
+  user-select: none;
+  font-weight: 700;
+  text-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
+  white-space: nowrap;
+  will-change: transform, opacity;
+}
+
+.particle-fade {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+.particle:hover {
+  transform: translate(-50%, -50%) scale(1.4) !important;
+  transition-duration: 120ms;
+}
+
+.neon-red { color: #FF073A; }
+.neon-green { color: #39FF14; }
+.neon-pink { color: #FF6EC7; }
+.black { color: #000000; text-shadow: none; }
+.neon-purple { color: #9D00FF; }
+.neon-blue { color: #00D4FF; }
+.neon-orange { color: #FF8C00; }
+.neon-yellow { color: #FFF700; }

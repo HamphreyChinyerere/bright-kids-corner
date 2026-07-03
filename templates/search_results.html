@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Search{% endblock %}
+{% block page_subtitle %}{% if query %}Results for "{{ query }}"{% else %}Search courses, games, assignments, projects, and VR content{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6">
+    <form action="{% url 'global_search' %}" method="get" class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-4 shadow-card flex gap-3">
+        <div class="relative flex-1">
+            <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-eduhive-muted"></i>
+            <input name="q" value="{{ query }}" autofocus
+                   placeholder="Search courses, games, assignments..."
+                   class="edu-input w-full pl-11 pr-4 py-3 text-sm font-semibold text-eduhive-text">
+        </div>
+        <button type="submit" class="bg-eduhive-accent text-white dark:text-[#1E1F24] font-bold px-6 rounded-xl hover:bg-eduhive-accent-hover transition-colors">
+            Search
+        </button>
+    </form>
+
+    {% if query %}
+        <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-eduhive-muted">{{ total_results }} result{{ total_results|pluralize }} found</p>
+            <a href="{% url 'global_search' %}" class="text-sm font-bold text-eduhive-accent hover:underline">Clear</a>
+        </div>
+
+        {% if total_results %}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {% if courses %}
+                <section class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-5 shadow-card">
+                    <h2 class="font-bold text-[#1A1A1A] dark:text-[#F4F5F7] mb-4">Courses</h2>
+                    <div class="space-y-2">
+                        {% for course in courses %}
+                        <a href="{% url 'course_detail' slug=course.slug %}" class="block p-3 rounded-xl hover:bg-[#FDF3F1] dark:hover:bg-[#2F323A] transition-colors">
+                            <p class="font-bold text-sm text-[#1A1A1A] dark:text-[#F4F5F7]">{{ course.title }}</p>
+                            <p class="text-xs text-eduhive-muted mt-1">{{ course.subject }}{% if course.duration_display %} &middot; {{ course.duration_display }}{% endif %}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if embedded_games or coding_games %}
+                <section class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-5 shadow-card">
+                    <h2 class="font-bold text-[#1A1A1A] dark:text-[#F4F5F7] mb-4">Games</h2>
+                    <div class="space-y-2">
+                        {% for game in embedded_games %}
+                        <a href="{% url 'games_library' %}?q={{ query|urlencode }}" class="block p-3 rounded-xl hover:bg-[#FDF3F1] dark:hover:bg-[#2F323A] transition-colors">
+                            <p class="font-bold text-sm text-[#1A1A1A] dark:text-[#F4F5F7]">{{ game.title }}</p>
+                            <p class="text-xs text-eduhive-muted mt-1">{{ game.get_category_display }} &middot; {{ game.get_age_group_display }}</p>
+                        </a>
+                        {% endfor %}
+                        {% for game in coding_games %}
+                        <a href="{% url 'game_sandbox' game_id=game.id %}" class="block p-3 rounded-xl hover:bg-[#FDF3F1] dark:hover:bg-[#2F323A] transition-colors">
+                            <p class="font-bold text-sm text-[#1A1A1A] dark:text-[#F4F5F7]">{{ game.title }}</p>
+                            <p class="text-xs text-eduhive-muted mt-1">{{ game.get_game_type_display }}{% if game.module %} &middot; {{ game.module.course.title }}{% endif %}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if assignments %}
+                <section class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-5 shadow-card">
+                    <h2 class="font-bold text-[#1A1A1A] dark:text-[#F4F5F7] mb-4">Assignments</h2>
+                    <div class="space-y-2">
+                        {% for task in assignments %}
+                        <a href="{% url 'assignment_workspace' %}" class="block p-3 rounded-xl hover:bg-[#FDF3F1] dark:hover:bg-[#2F323A] transition-colors">
+                            <p class="font-bold text-sm text-[#1A1A1A] dark:text-[#F4F5F7]">{{ task.assignment_title }}</p>
+                            <p class="text-xs text-eduhive-muted mt-1">{{ task.subject_tag }} &middot; Due {{ task.due_date|date:"M d, Y" }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if projects %}
+                <section class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-5 shadow-card">
+                    <h2 class="font-bold text-[#1A1A1A] dark:text-[#F4F5F7] mb-4">Projects</h2>
+                    <div class="space-y-2">
+                        {% for project in projects %}
+                        <a href="{% if project.course %}{% url 'course_detail' slug=project.course.slug %}{% else %}{% url 'projects_hub' %}{% endif %}" class="block p-3 rounded-xl hover:bg-[#FDF3F1] dark:hover:bg-[#2F323A] transition-colors">
+                            <p class="font-bold text-sm text-[#1A1A1A] dark:text-[#F4F5F7]">{{ project.title }}</p>
+                            <p class="text-xs text-eduhive-muted mt-1">{{ project.project_type }}{% if project.course %} &middot; {{ project.course.title }}{% endif %}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if vr_content %}
+                <section class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-5 shadow-card">
+                    <h2 class="font-bold text-[#1A1A1A] dark:text-[#F4F5F7] mb-4">VR</h2>
+                    <div class="space-y-2">
+                        {% for item in vr_content %}
+                        <a href="{% if item.content_type == '360_video' %}{% url 'vr_360' %}{% elif item.content_type == 'webxr' %}{% url 'vr_webxr' %}{% elif item.content_type == 'simulation' %}{% url 'vr_simulation' %}{% else %}{% url 'vr_portal' %}{% endif %}" class="block p-3 rounded-xl hover:bg-[#FDF3F1] dark:hover:bg-[#2F323A] transition-colors">
+                            <p class="font-bold text-sm text-[#1A1A1A] dark:text-[#F4F5F7]">{{ item.title }}</p>
+                            <p class="text-xs text-eduhive-muted mt-1">{{ item.get_content_type_display }}{% if item.subject %} &middot; {{ item.subject }}{% endif %}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-12 text-center shadow-card">
+                <i class="ph-bold ph-magnifying-glass text-6xl text-gray-300"></i>
+                <p class="font-bold text-lg text-[#1A1A1A] dark:text-[#F4F5F7] mt-4">No results found</p>
+                <p class="text-sm text-eduhive-muted mt-2">Try a course title, subject, game, assignment, or project keyword.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="bg-white border border-[#F5E4DC] dark:bg-[#26282E] dark:border-[#2F323A] rounded-2xl p-12 text-center shadow-card">
+            <i class="ph-bold ph-keyboard text-6xl text-gray-300"></i>
+            <p class="font-bold text-lg text-[#1A1A1A] dark:text-[#F4F5F7] mt-4">Type something to search</p>
+            <p class="text-sm text-eduhive-muted mt-2">Search across courses, games, assignments, projects, and VR content.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

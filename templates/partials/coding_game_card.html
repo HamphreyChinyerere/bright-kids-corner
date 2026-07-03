@@ -1,0 +1,21 @@
+<div class="bg-white rounded-xl p-6 shadow-card border border-[#F5E4DC] dark:bg-neutral-900 dark:border-neutral-800 h-full flex flex-col">
+    <div class="flex justify-between items-center mb-4">
+        <span class="bg-[#FDE2D9] text-[#C85D44] px-3 py-1 rounded-full text-xs font-semibold">
+            {% if game.game_type == 'scratch' %}Scratch Sandbox{% else %}WoofJS Sandbox{% endif %}
+        </span>
+        {% if game.module %}
+        <span class="text-eduhive-muted-light dark:text-neutral-500 text-xs text-right max-w-[50%] truncate">{{ game.module.course.title }}</span>
+        {% endif %}
+    </div>
+    <h3 class="text-lg font-bold text-[#1A1A1A] dark:text-white mb-1">{{ game.title }}</h3>
+    {% if game.module %}
+    <p class="text-xs text-eduhive-muted dark:text-neutral-400 mb-2">{{ game.module.title }}</p>
+    {% endif %}
+    <p class="text-sm text-eduhive-muted dark:text-neutral-400 mb-4 flex-1 line-clamp-3">
+        {{ game.description|default:"Open the embedded lab and complete the module challenge." }}
+    </p>
+    <a href="{% url 'game_sandbox' game_id=game.id %}"
+       class="inline-block text-center bg-[#E67E66] hover:bg-[#D66D56] text-white font-medium text-sm px-4 py-2 rounded-lg transition">
+        Launch Interactive Lab
+    </a>
+</div>

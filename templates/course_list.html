@@ -1,0 +1,577 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+
+{% block header_title %}My Courses{% endblock %}
+{% block page_subtitle %}Let's learn something new today!{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto">
+
+    <!-- ── Filter Tabs ─────────────────────────────────────────────────── -->
+    <div class="flex items-center gap-3 mb-8 flex-wrap">
+        <a href="?filter=all"
+           class="px-5 py-2 rounded-full text-sm font-semibold transition-all
+                  {% if filter_tab == 'all' or not filter_tab %}bg-[#1A1A1A] text-white shadow-md{% else %}text-gray-500 hover:text-[#1A1A1A] hover:bg-gray-100{% endif %}">
+            All Courses
+        </a>
+        <a href="?filter=ongoing"
+           class="px-5 py-2 rounded-full text-sm font-semibold transition-all
+                  {% if filter_tab == 'ongoing' %}bg-[#1A1A1A] text-white shadow-md{% else %}text-gray-500 hover:text-[#1A1A1A] hover:bg-gray-100{% endif %}">
+            Ongoing
+        </a>
+        <a href="?filter=completed"
+           class="px-5 py-2 rounded-full text-sm font-semibold transition-all
+                  {% if filter_tab == 'completed' %}bg-[#1A1A1A] text-white shadow-md{% else %}text-gray-500 hover:text-[#1A1A1A] hover:bg-gray-100{% endif %}">
+            Completed
+        </a>
+    </div>
+
+    <!-- ── Featured / Offered Courses (Static Catalog) ────────────────── -->
+    {% if filter_tab == 'all' or not filter_tab %}
+    <div class="mb-10">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h2 class="text-lg font-bold text-[#1A1A1A]">Featured Courses</h2>
+                <p class="text-sm text-gray-400 mt-0.5">Explore all available subjects</p>
+            </div>
+            <span class="text-xs text-gray-400 bg-gray-100 px-3 py-1.5 rounded-full font-medium">10 subjects</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+            {% with catalog_courses=True %}
+
+            <!-- Python -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group">
+                <a href="{% url 'course_detail' slug='python-coding' %}" class="block">
+                    <div class="relative h-44 overflow-hidden bg-gray-100">
+                        <img src="{% catalog_thumbnail 'Python Coding' %}"
+                             alt="Python Coding"
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                             loading="lazy">
+                        <div class="absolute top-4 right-4 flex flex-col items-end gap-1">
+                            <span class="bg-[#3776AB] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Popular</span>
+                            {% if python_enrollment %}
+                            <span class="bg-[#E67E66] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Ongoing</span>
+                            {% endif %}
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Python Coding</h3>
+                            <span class="text-[#E67E66] font-bold text-sm shrink-0">
+                                {% if python_enrollment %}{{ python_enrollment.progress_percent }}%{% else %}Beginner{% endif %}
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-4 line-clamp-2">Learn Python from scratch — variables, loops, functions, and building real projects.</p>
+                        {% if python_enrollment %}
+                        <div class="mb-4">
+                            <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-[#E67E66] rounded-full transition-all"
+                                     style="width: {{ python_enrollment.progress_percent }}%"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                            <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 8 hr 30 min</span>
+                            <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 12 chapters</span>
+                            <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 40 videos</span>
+                        </div>
+                    </div>
+                </a>
+                <div class="px-5 pb-5 -mt-2 flex items-center justify-between border-t border-gray-50 pt-3 mx-5">
+                    <div class="flex items-center gap-2">
+                        <img src="https://i.pravatar.cc/150?img=11" class="w-7 h-7 rounded-full" alt="">
+                        <span class="text-xs font-medium text-gray-600">Alex Rivera</span>
+                    </div>
+                    <a href="{% url 'course_detail' slug='python-coding' %}{% if not python_enrollment %}#enroll{% endif %}"
+                       class="text-xs {% if python_enrollment %}bg-white text-[#E67E66] border border-[#E67E66]{% else %}bg-[#E67E66] text-white{% endif %} px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] hover:text-white hover:border-transparent transition-colors"
+                       onclick="event.stopPropagation();">
+                        {% if python_enrollment %}Continue{% else %}Enroll Free{% endif %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- JavaScript -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('JavaScript', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'JavaScript' %}"
+                         alt="JavaScript"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-yellow-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Trending</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">JavaScript</h3>
+                        <span class="text-[#E67E66] font-bold text-sm shrink-0">Beginner</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Master the language of the web — DOM manipulation, async JS, and interactive UIs.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 10 hr</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 14 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 48 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=22" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Jordan Blake</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HTML & CSS -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('HTML & CSS', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'HTML & CSS' %}"
+                         alt="HTML &amp; CSS"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-orange-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Essential</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">HTML & CSS</h3>
+                        <span class="text-[#E67E66] font-bold text-sm shrink-0">Beginner</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Build beautiful web pages from scratch using HTML5 structure and modern CSS styling.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 6 hr 20 min</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 10 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 32 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=33" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Casey Harper</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IT Basics -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('IT Basics', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'IT Basics' %}"
+                         alt="IT Basics"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-cyan-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">New</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">IT Basics</h3>
+                        <span class="text-green-500 font-bold text-sm shrink-0">Beginner</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Understand how computers, networks, and operating systems work from the ground up.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 5 hr 45 min</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 8 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 28 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=44" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Morgan Lee</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chemistry -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('Chemistry', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'Chemistry' %}"
+                         alt="Chemistry"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-[#C85D44] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Science</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Chemistry</h3>
+                        <span class="text-[#E67E66] font-bold text-sm shrink-0">Intermediate</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Explore atoms, molecules, reactions, and the periodic table through visual experiments.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 7 hr 15 min</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 11 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 35 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=55" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Riley Quinn</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Physics -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('Physics', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'Physics' %}"
+                         alt="Physics"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-purple-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Science</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Physics</h3>
+                        <span class="text-[#E67E66] font-bold text-sm shrink-0">Intermediate</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Discover forces, energy, waves, electricity and the laws governing our universe.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 9 hr</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 13 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 42 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=66" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Taylor Swift</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mathematics -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('Mathematics', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'Mathematics' %}"
+                         alt="Mathematics"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-pink-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Core</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Mathematics</h3>
+                        <span class="text-[#E67E66] font-bold text-sm shrink-0">All Levels</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Algebra, geometry, calculus and statistics — build strong mathematical foundations.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 12 hr</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 16 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 55 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=77" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Sam Johnson</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Geography -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('Geography', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'Geography' %}"
+                         alt="Geography"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-emerald-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Explore</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Geography</h3>
+                        <span class="text-green-500 font-bold text-sm shrink-0">All Levels</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Study continents, climates, ecosystems, and the cultures that shape our world.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 6 hr</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 9 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 30 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=88" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Priya Sharma</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Astronomy -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('Astronomy', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'Astronomy' %}"
+                         alt="Astronomy"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-indigo-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Featured</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Astronomy</h3>
+                        <span class="text-indigo-500 font-bold text-sm shrink-0">All Levels</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Journey through stars, galaxies, black holes and the origins of our solar system.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 8 hr</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 12 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 38 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=99" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Dr. Neil Park</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engineering -->
+            <div class="bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group cursor-pointer"
+                 onclick="enrollCourse('Engineering', this)">
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{% catalog_thumbnail 'Engineering' %}"
+                         alt="Engineering"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-orange-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Advanced</span>
+                    </div>
+                    <div class="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug">Engineering</h3>
+                        <span class="text-orange-500 font-bold text-sm shrink-0">Intermediate</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4 line-clamp-2">Explore mechanical, electrical, and software engineering principles through real-world projects.</p>
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-clock text-[#E67E66]"></i> 14 hr</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#F4A261]"></i> 18 chapters</span>
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> 60 videos</span>
+                    </div>
+                    <hr class="border-gray-100 mb-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <img src="https://i.pravatar.cc/150?img=10" class="w-7 h-7 rounded-full" alt="">
+                            <span class="text-xs font-medium text-gray-600">Chris Okafor</span>
+                        </div>
+                        <button class="text-xs bg-[#E67E66] text-white px-3 py-1.5 rounded-full font-semibold hover:bg-[#D66D56] transition-colors enroll-btn">
+                            Enroll Free
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% endwith %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── My Enrolled Courses (from DB) ───────────────────────────────── -->
+    {% if courses_with_status %}
+    <div>
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h2 class="text-lg font-bold text-[#1A1A1A]">
+                    {% if filter_tab == 'ongoing' %}Ongoing Courses
+                    {% elif filter_tab == 'completed' %}Completed Courses
+                    {% else %}My Enrolled Courses{% endif %}
+                </h2>
+                <p class="text-sm text-gray-400 mt-0.5">{{ courses_with_status|length }} course{{ courses_with_status|length|pluralize }}</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% for item in courses_with_status %}
+            <a href="{% url 'course_detail' slug=item.course.slug %}"
+               class="block bg-white rounded-2xl shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden group">
+
+                <!-- Thumbnail -->
+                <div class="relative h-44 overflow-hidden bg-gray-100">
+                    <img src="{{ item.course|course_thumbnail_url }}"
+                         alt="{{ item.course.title }}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                         loading="lazy">
+
+                    <!-- Status badge -->
+                    <div class="absolute top-4 right-4">
+                        {% if item.status == 'completed' %}
+                            <span class="bg-[#C85D44] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                                ✓ Completed
+                            </span>
+                        {% elif item.status == 'ongoing' %}
+                            <span class="bg-[#E67E66] text-white text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+                                Ongoing
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="p-5">
+                    <div class="flex justify-between items-start gap-3 mb-2">
+                        <h3 class="font-bold text-[#1A1A1A] text-base leading-snug line-clamp-2">{{ item.course.title }}</h3>
+                        <span class="font-bold text-sm shrink-0
+                            {% if item.progress == 100 %}text-[#C85D44]
+                            {% elif item.progress > 50 %}text-[#E67E66]
+                            {% else %}text-gray-400{% endif %}">
+                            {{ item.progress }}%
+                        </span>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
+                        <div class="h-full rounded-full transition-all duration-700
+                            {% if item.progress == 100 %}bg-[#C85D44]{% else %}bg-[#E67E66]{% endif %}"
+                             style="width: {{ item.progress }}%"></div>
+                    </div>
+
+                    <!-- Meta -->
+                    <div class="flex items-center gap-3 text-xs text-gray-400 mb-4">
+                        <span class="flex items-center gap-1">
+                            <i class="ph-bold ph-clock text-[#E67E66]"></i>
+                            {{ item.course.duration_display|default:"— hr" }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="ph-bold ph-stack text-[#F4A261]"></i>
+                            {{ item.course.total_chapters }} chapters
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="ph-bold ph-video text-[#E67E66]"></i>
+                            {{ item.course.total_videos }} videos
+                        </span>
+                    </div>
+
+                    <hr class="border-gray-100 mb-3">
+
+                    <div class="flex items-center gap-2">
+                        <img src="https://i.pravatar.cc/150?img={{ item.course.id }}"
+                             class="w-7 h-7 rounded-full bg-gray-200" alt="">
+                        <span class="text-xs font-medium text-gray-600">
+                            {{ item.course.instructor_name|default:"Instructor" }}
+                        </span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% elif filter_tab == 'ongoing' or filter_tab == 'completed' %}
+    <!-- Empty state for filtered tabs -->
+    <div class="text-center py-20 bg-white rounded-2xl shadow-card">
+        <i class="ph-bold ph-books text-gray-200 text-6xl"></i>
+        <p class="font-semibold text-gray-400 text-lg mt-4">
+            No {% if filter_tab == 'ongoing' %}ongoing{% else %}completed{% endif %} courses yet.
+        </p>
+        <a href="?filter=all"
+           class="inline-block mt-4 bg-[#E67E66] text-white text-sm font-semibold px-6 py-3 rounded-full hover:bg-[#D66D56] transition-colors shadow-sm">
+            Browse All Courses
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ── Enroll Toast ────────────────────────────────────────────────────── -->
+<div id="enroll-toast"
+     class="fixed bottom-6 right-6 bg-[#1A1A1A] text-white text-sm font-medium px-5 py-3.5 rounded-2xl shadow-xl
+            flex items-center gap-3 z-50 translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i class="ph-bold ph-check-circle text-green-400 text-xl"></i>
+    <span id="toast-message">Enrolled successfully!</span>
+</div>
+
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+function enrollCourse(courseName, cardEl) {
+    // Don't trigger if clicking the actual enroll button (let it bubble up)
+    const btn = cardEl.querySelector('.enroll-btn');
+
+    // Visual feedback on card
+    cardEl.classList.add('ring-2', 'ring-[#E67E66]', 'ring-offset-2');
+    setTimeout(() => cardEl.classList.remove('ring-2', 'ring-[#E67E66]', 'ring-offset-2'), 1500);
+
+    // Update button
+    if (btn) {
+        btn.textContent = '✓ Enrolled';
+        btn.classList.remove('bg-[#E67E66]', 'hover:bg-[#D66D56]');
+        btn.classList.add('bg-green-500', 'cursor-default');
+    }
+
+    // Show toast
+    const toast = document.getElementById('enroll-toast');
+    document.getElementById('toast-message').textContent = `Enrolled in ${courseName}!`;
+    toast.classList.remove('translate-y-20', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+    }, 3000);
+}
+</script>
+{% endblock %}

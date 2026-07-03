@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+
+{% block header_title %}Projects{% endblock %}
+{% block page_subtitle %}
+    {% if selected_course %}
+        <a href="{% url 'projects_hub' %}" class="text-eduhive-muted hover:text-eduhive-accent">Projects</a>
+        <span class="text-gray-300 mx-1">/</span>
+        <span>{{ selected_course.title }}</span>
+    {% elif sandbox_view == 'scratch' %}
+        <a href="{% url 'projects_hub' %}" class="text-eduhive-muted hover:text-eduhive-accent">Projects</a>
+        <span class="text-gray-300 mx-1">/</span>
+        <span>Scratch</span>
+    {% elif sandbox_view == 'text' %}
+        <a href="{% url 'projects_hub' %}" class="text-eduhive-muted hover:text-eduhive-accent">Projects</a>
+        <span class="text-gray-300 mx-1">/</span>
+        <span>Text sandboxes</span>
+    {% else %}
+        Browse projects by course and sandbox type
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-8">
+
+    {% if selected_course %}
+    <!-- ── Course project detail ─────────────────────────────────────── -->
+    <header class="bg-white border border-eduhive-border rounded-2xl p-6 shadow-card flex flex-col sm:flex-row gap-4 sm:items-center">
+        <div class="flex items-center gap-4 flex-1 min-w-0">
+            <img src="{{ selected_course|course_thumbnail_url }}" alt=""
+                 class="w-16 h-16 rounded-xl object-cover shrink-0">
+            <div class="min-w-0">
+                <p class="text-xs font-bold uppercase tracking-wider text-[#E67E66]">{{ selected_course.get_subject_display|default:selected_course.subject }}</p>
+                <h1 class="text-2xl font-bold text-[#1A1A1A] truncate">{{ selected_course.title }}</h1>
+                <p class="text-sm text-eduhive-muted mt-0.5">{{ ongoing_projects|length }} ongoing · {{ finished_projects|length }} finished</p>
+            </div>
+        </div>
+        <a href="{% url 'course_detail' slug=selected_course.slug %}"
+           class="shrink-0 text-sm font-semibold text-[#E67E66] hover:underline flex items-center gap-1">
+            <i class="ph-bold ph-book-open"></i> Course outline
+        </a>
+    </header>
+
+  {% if ongoing_projects %}
+    <section>
+        <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full bg-[#E67E66]"></span>
+            <h2 class="text-lg font-bold text-[#1A1A1A]">Ongoing</h2>
+            <span class="text-xs font-semibold text-eduhive-muted bg-gray-100 px-2 py-0.5 rounded-full">{{ ongoing_projects|length }}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in ongoing_projects %}
+            {% include 'partials/project_course_card.html' with project=project %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if finished_projects %}
+    <section>
+        <div class="flex items-center gap-2 mb-4">
+            <span class="w-2 h-2 rounded-full bg-[#C85D44]"></span>
+            <h2 class="text-lg font-bold text-[#1A1A1A]">Finished</h2>
+            <span class="text-xs font-semibold text-eduhive-muted bg-gray-100 px-2 py-0.5 rounded-full">{{ finished_projects|length }}</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in finished_projects %}
+            {% include 'partials/project_course_card.html' with project=project %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if not ongoing_projects and not finished_projects %}
+    <div class="bg-white rounded-2xl shadow-card p-12 text-center border border-eduhive-border">
+        <i class="ph-bold ph-folders text-[#E67E66] text-5xl mb-4"></i>
+        <p class="font-semibold text-[#1A1A1A]">No projects for this course yet</p>
+        <p class="text-sm text-eduhive-muted mt-2 mb-6">Enroll and open the course outline to unlock module projects.</p>
+        <a href="{% url 'course_detail' slug=selected_course.slug %}"
+           class="inline-block bg-[#E67E66] text-white font-semibold px-6 py-2.5 rounded-full hover:bg-[#D66D56] transition-colors">
+            Go to course outline
+        </a>
+    </div>
+    {% endif %}
+
+    {% elif sandbox_view == 'scratch' %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[650px]">
+        
+        <div class="lg:col-span-3 bg-white border border-eduhive-border rounded-2xl p-5 shadow-card flex flex-col justify-between">
+            <div class="space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
+                        <span>🧩</span> Block Sandbox
+                    </h2>
+                    <p class="text-xs text-eduhive-muted mt-1">Select a core logical blueprint challenge to begin debugging structure.</p>
+                </div>
+
+                <div class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                    <div onclick="updateScratchLab('Sequence Control', 'Construct a sequential logic block setup that moves the character sprite forward 10 steps, triggers a direction configuration change, and loops the script execution continuously.')"
+                         class="p-3 bg-[#FDF3F1] border-2 border-[#E67E66] rounded-xl cursor-pointer transition-all">
+                        <h3 class="text-xs font-bold text-[#1A1A1A]">1. Vector Steps Matrix</h3>
+                        <p class="text-[10px] text-eduhive-muted mt-0.5">Procedural logic & loops</p>
+                    </div>
+
+                    <div onclick="updateScratchLab('Conditionals Gate', 'Configure an evaluation block array. Check if the mouse input position touches the dynamic obstacle vector, then trigger an auxiliary broadcast signal state.')"
+                         class="p-3 bg-white border border-eduhive-border hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
+                        <h3 class="text-xs font-bold text-gray-700">2. Conditional Collision</h3>
+                        <p class="text-[10px] text-eduhive-muted mt-0.5">If/Else input boundaries</p>
+                    </div>
+
+                    <div onclick="updateScratchLab('Variable Clocks', 'Establish a numeric global tracker field. Modify the tracker value incrementally by a scale factor of 1 every structural processing frame cycle.')"
+                         class="p-3 bg-white border border-eduhive-border hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
+                        <h3 class="text-xs font-bold text-gray-700">3. Global Counter Arrays</h3>
+                        <p class="text-[10px] text-eduhive-muted mt-0.5">State allocation & mutations</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 p-4 bg-[#1A1A1A] rounded-xl text-white font-mono text-[11px] space-y-1.5 shadow-inner">
+                <div class="text-[#E67E66] font-bold uppercase tracking-wider text-[10px]" id="scratch-lab-title">// Lab: Sequence Control</div>
+                <p id="scratch-lab-desc" class="text-gray-400 leading-relaxed text-[11px]">
+                    Construct a sequential logic block setup that moves the character sprite forward 10 steps, triggers a direction configuration change, and loops the script execution continuously.
+                </p>
+            </div>
+        </div>
+
+        <div class="lg:col-span-9 bg-black rounded-2xl overflow-hidden shadow-card border border-eduhive-border flex flex-col">
+            <div class="p-3 bg-white border-b border-eduhive-border flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="text-xs font-mono text-eduhive-muted ml-2">scratch_compiler_runtime.io</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-mono bg-green-50 text-green-600 font-bold px-2 py-0.5 rounded border border-green-100">Active Lab</span>
+                </div>
+            </div>
+
+            <div class="flex-1 min-h-[580px] relative bg-neutral-900">
+                <iframe id="scratch-workspace-frame"
+                        src="https://turbowarp.org/embed.html?editor=true&addons=clones"
+                        class="absolute inset-0 w-full h-full border-0"
+                        allowfullscreen
+                        allow="accelerometer; gyroscope; camera; microphone"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateScratchLab(title, description) {
+            document.getElementById('scratch-lab-title').textContent = '// Lab: ' + title;
+            document.getElementById('scratch-lab-desc').textContent = description;
+            
+            // Switch styles on side challenge selection tags
+            const cards = event.currentTarget.parentNode.children;
+            for (let card of cards) {
+                card.className = "p-3 bg-white border border-eduhive-border hover:bg-gray-50 rounded-xl cursor-pointer transition-all";
+                const heading = card.querySelector('h3');
+                if(heading) heading.className = "text-xs font-bold text-gray-700";
+            }
+            event.currentTarget.className = "p-3 bg-[#FDF3F1] border-2 border-[#E67E66] rounded-xl cursor-pointer transition-all";
+            event.currentTarget.querySelector('h3').className = "text-xs font-bold text-[#1A1A1A]";
+        }
+    </script>
+
+    {% elif sandbox_view == 'text' %}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[650px]">
+        
+        <div class="lg:col-span-3 bg-white border border-eduhive-border rounded-2xl p-5 shadow-card flex flex-col justify-between">
+            <div class="space-y-5">
+                <div>
+                    <h2 class="text-lg font-bold text-[#1A1A1A] flex items-center gap-2">
+                        <span>💻</span> JS Text Canvas
+                    </h2>
+                    <p class="text-xs text-eduhive-muted mt-1">Select a text-based syntax lab blueprint to initialize structural logic arrays.</p>
+                </div>
+
+                <div class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                    <div onclick="updateWoofLab('Sprite Rendering', 'Initialize an image asset matrix. Use standard structural canvas syntax:\n\nvar player = new Image({url: \u0022...\u0022, x: 0, y: 0});\n\nVerify that the coordinates render precisely on the central center axes.')"
+                         class="p-3 bg-[#FDF3F1] border-2 border-[#E67E66] rounded-xl cursor-pointer transition-all">
+                        <h3 class="text-xs font-bold text-[#1A1A1A]">1. Coordinate Vectors</h3>
+                        <p class="text-[10px] text-eduhive-muted mt-0.5">Asset definition & space maps</p>
+                    </div>
+
+                    <div onclick="updateWoofLab('Execution Loops', 'Establish continuous runtime processing configuration changes. Practice setting up game step clocks using standard methods:\n\nevery(1, \u0022second\u0022, function() {\n  player.x += 10;\n});')"
+                         class="p-3 bg-white border border-eduhive-border hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
+                        <h3 class="text-xs font-bold text-gray-700">2. Global Step Clocks</h3>
+                        <p class="text-[10px] text-eduhive-muted mt-0.5">Continuous sequence timers</p>
+                    </div>
+
+                    <div onclick="updateWoofLab('Boundary Collision', 'Apply an input checking condition configuration. Use calculation statements to verify window boundary metrics:\n\nonKeyPress(\u0022space\u0022, function() {\n  if (player.y \u003C 200) player.y += 50;\n});')"
+                         class="p-3 bg-white border border-eduhive-border hover:bg-gray-50 rounded-xl cursor-pointer transition-all">
+                        <h3 class="text-xs font-bold text-gray-700">3. Functional Input Listeners</h3>
+                        <p class="text-[10px] text-eduhive-muted mt-0.5">Event handling & limits</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 p-4 bg-[#1A1A1A] rounded-xl text-white font-mono text-[11px] space-y-1.5 shadow-inner">
+                <div class="text-[#E67E66] font-bold uppercase tracking-wider text-[10px]" id="woof-lab-title">// Lab: Sprite Rendering</div>
+                <pre id="woof-lab-desc" class="text-gray-400 whitespace-pre-wrap font-sans text-[11px] leading-relaxed">Initialize an image asset matrix. Use standard structural canvas syntax:
+
+var player = new Image({url: "...", x: 0, y: 0});
+
+Verify that the coordinates render precisely on the central center axes.</pre>
+            </div>
+        </div>
+
+        <div class="lg:col-span-9 bg-black rounded-2xl overflow-hidden shadow-card border border-eduhive-border flex flex-col">
+            <div id="woof-header" class="p-3 bg-white border-b border-eduhive-border flex items-center justify-between">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="text-xs font-mono text-eduhive-muted ml-2">woof_runtime_compiler.js</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-mono bg-purple-50 text-purple-600 font-bold px-2 py-0.5 rounded border border-purple-100">JavaScript Mode</span>
+                    <button id="woof-fullscreen-btn" aria-pressed="false" title="Toggle full screen"
+                        class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600">
+                        <i class="ph-bold ph-arrows-out-simple"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="woof-workspace-frame-wrapper" class="flex-1 min-h-[580px] relative bg-[#1E1E1E]">
+                <iframe id="woof-workspace-frame"
+                        src="https://woofjs.com/create.html"
+                        class="absolute inset-0 w-full h-full border-0"
+                        allowfullscreen
+                        allow="accelerometer; gyroscope"></iframe>
+            </div>
+            <!-- Floating fullscreen bar (hidden by default) -->
+            <div id="woof-fs-bar" class="fixed left-1/2 -translate-x-1/2 top-4 z-50 opacity-0 pointer-events-none transform -translate-y-2 transition-all duration-200 ease-out">
+                <div class="bg-white/95 backdrop-blur-sm rounded-full px-3 py-2 shadow-md flex items-center gap-2 border border-gray-200">
+                    <button id="woof-fs-exit" title="Exit Full Screen Mode" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateWoofLab(title, description) {
+            document.getElementById('woof-lab-title').textContent = '// Lab: ' + title;
+            document.getElementById('woof-lab-desc').textContent = description;
+            
+            // Toggle visual selected indicators across side challenge elements
+            const cards = event.currentTarget.parentNode.children;
+            for (let card of cards) {
+                card.className = "p-3 bg-white border border-eduhive-border hover:bg-gray-50 rounded-xl cursor-pointer transition-all";
+                const heading = card.querySelector('h3');
+                if(heading) heading.className = "text-xs font-bold text-gray-700";
+            }
+            event.currentTarget.className = "p-3 bg-[#FDF3F1] border-2 border-[#E67E66] rounded-xl cursor-pointer transition-all";
+            event.currentTarget.querySelector('h3').className = "text-xs font-bold text-[#1A1A1A]";
+        }
+
+        // Fullscreen toggle and floating bar behavior for WoofJS iframe wrapper
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('woof-fullscreen-btn');
+            const wrapper = document.getElementById('woof-workspace-frame-wrapper');
+            const header = document.getElementById('woof-header');
+            const fsBar = document.getElementById('woof-fs-bar');
+            const fsExit = document.getElementById('woof-fs-exit');
+            let hideBarTimeout = null;
+
+            function showFsBar() {
+                if (!fsBar) return;
+                fsBar.style.opacity = '1';
+                fsBar.style.transform = 'translateX(-50%) translateY(0)';
+                fsBar.style.pointerEvents = 'auto';
+            }
+
+            function hideFsBar() {
+                if (!fsBar) return;
+                fsBar.style.opacity = '0';
+                fsBar.style.transform = 'translateX(-50%) translateY(-8px)';
+                fsBar.style.pointerEvents = 'none';
+            }
+
+            function onEnterFullscreen() {
+                if (header) header.style.display = 'none';
+                // show small hint bar when user moves to top
+                document.addEventListener('mousemove', onMouseMove);
+                // ensure fsBar hidden initially
+                hideFsBar();
+            }
+
+            function onExitFullscreen() {
+                if (header) header.style.display = '';
+                document.removeEventListener('mousemove', onMouseMove);
+                hideFsBar();
+            }
+
+            function onMouseMove(e) {
+                if (!document.fullscreenElement) return;
+                if (e.clientY <= 80) {
+                    // near top -> show
+                    clearTimeout(hideBarTimeout);
+                    showFsBar();
+                } else {
+                    // start hiding after short delay
+                    clearTimeout(hideBarTimeout);
+                    hideBarTimeout = setTimeout(hideFsBar, 800);
+                }
+            }
+
+            if (!btn || !wrapper) return;
+
+            btn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    const request = wrapper.requestFullscreen ? wrapper.requestFullscreen() : (wrapper.webkitRequestFullscreen ? wrapper.webkitRequestFullscreen() : null);
+                    if (request && request.then) request.then(onEnterFullscreen).catch(() => {});
+                    else onEnterFullscreen();
+                    btn.setAttribute('aria-pressed', 'true');
+                    btn.title = 'Exit full screen';
+                } else {
+                    const exit = document.exitFullscreen ? document.exitFullscreen() : (document.webkitExitFullscreen ? document.webkitExitFullscreen() : null);
+                    if (exit && exit.then) exit.then(onExitFullscreen).catch(() => {});
+                    else onExitFullscreen();
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.title = 'Toggle full screen';
+                }
+            });
+
+            // Exit button inside floating bar
+            if (fsExit) {
+                fsExit.addEventListener('click', function() {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                });
+            }
+
+            // Keep aria state in sync if user presses ESC or uses browser controls
+            document.addEventListener('fullscreenchange', function() {
+                const isFs = !!document.fullscreenElement;
+                btn.setAttribute('aria-pressed', isFs ? 'true' : 'false');
+                btn.title = isFs ? 'Exit full screen' : 'Toggle full screen';
+                if (isFs) onEnterFullscreen(); else onExitFullscreen();
+            });
+        });
+    </script>
+
+    {% else %}
+    <!-- ── Hub: course & subject tiles ───────────────────────────────── -->
+    <header class="bg-white border border-eduhive-border rounded-2xl p-6 shadow-card">
+        <h1 class="text-2xl font-bold text-[#1A1A1A]">Projects</h1>
+        <p class="text-sm text-eduhive-muted mt-1">Choose a course or sandbox category to view your work.</p>
+    </header>
+
+    {% if course_tiles %}
+    <section>
+        <h2 class="text-lg font-bold text-[#1A1A1A] mb-1">By course</h2>
+        <p class="text-sm text-eduhive-muted mb-5">Projects tied to your enrolled courses</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {% for tile in course_tiles %}
+            <a href="{% url 'projects_hub' %}?course={{ tile.course.slug }}"
+               class="group bg-white border border-eduhive-border rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover transition-all">
+                <div class="relative h-32 bg-gray-100">
+                    <img src="{{ tile.course|course_thumbnail_url }}" alt="{{ tile.course.title }}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    <span class="absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-wider text-white/90 bg-black/30 px-2 py-0.5 rounded-full">
+                        {{ tile.course.get_subject_display|default:tile.course.subject }}
+                    </span>
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-[#1A1A1A] group-hover:text-[#E67E66] transition-colors">{{ tile.course.title }}</h3>
+                    <div class="flex items-center gap-3 mt-3 text-xs font-semibold">
+                        {% if tile.ongoing_count %}
+                        <span class="text-[#E67E66]">{{ tile.ongoing_count }} ongoing</span>
+                        {% endif %}
+                        {% if tile.finished_count %}
+                        <span class="text-[#C85D44]">{{ tile.finished_count }} finished</span>
+                        {% endif %}
+                        {% if not tile.total %}
+                        <span class="text-eduhive-muted">No projects yet</span>
+                        {% endif %}
+                    </div>
+                    {% if tile.total %}
+                    <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mt-3">
+                        <div class="h-full bg-[#C85D44] rounded-full" style="width: {% widthratio tile.finished_count tile.total 100 %}%"></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section>
+        <h2 class="text-lg font-bold text-[#1A1A1A] mb-1">By subject / sandbox</h2>
+        <p class="text-sm text-eduhive-muted mb-5">Personal creative projects outside course tracks</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {% for tile in sandbox_tiles %}
+            <a href="{% url 'projects_hub' %}?sandbox={{ tile.slug }}"
+               class="group flex items-center gap-4 bg-white border border-eduhive-border rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-all">
+                <div class="w-14 h-14 rounded-2xl bg-[#E67E66]/10 flex items-center justify-center text-2xl shrink-0">
+                    {{ tile.icon }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-[#1A1A1A] group-hover:text-[#E67E66] transition-colors">{{ tile.title }}</h3>
+                    <p class="text-xs text-eduhive-muted mt-0.5">{{ tile.subject }}</p>
+                    <p class="text-xs font-semibold text-[#E67E66] mt-1">{{ tile.count }} project{{ tile.count|pluralize }}</p>
+                </div>
+                <i class="ph-bold ph-caret-right text-eduhive-muted group-hover:text-[#E67E66]"></i>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</div>
+
+{% if not selected_course and not sandbox_view %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const publishButtons = document.querySelectorAll('.publish-btn');
+    publishButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const form = this.closest('form');
+            if (!form) return;
+            const projectId = form.querySelector('input[name="project_id"]').value;
+            const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Publishing...';
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ action: 'publish', project_id: projectId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    button.className = 'w-full bg-gray-100 text-eduhive-muted px-4 py-2 rounded-xl font-bold cursor-not-allowed';
+                    button.textContent = 'Already published';
+                } else {
+                    button.disabled = false;
+                    button.textContent = 'Publish to Public Arcade';
+                    alert('Failed to publish project.');
+                }
+            })
+            .catch(() => {
+                button.disabled = false;
+                button.textContent = 'Publish to Public Arcade';
+            });
+        });
+    });
+});
+</script>
+{% endif %}
+{% endblock content %}

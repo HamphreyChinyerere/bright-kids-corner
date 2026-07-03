@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6" >
+    <div class="bg-[#FFFFFF] border border-eduhive-border rounded-2xl p-10 max-w-3xl mx-auto text-center shadow-card">
+        <h1 class=" text-4xl font-bold mb-6">VR Hardware Synchronization Hub</h1>
+        
+        <!-- Abstract Hardware Graphic -->
+        <div class="w-64 h-64 mx-auto bg-slate-100 border border-eduhive-border rounded-3xl mb-8 flex items-center justify-center relative overflow-hidden shadow-inner">
+            <svg class="w-32 h-32 text-[#1A1A1A] z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M3 10l3-5h12l3 5M3 10h18M8 14h.01M16 14h.01"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v3m0 0a3 3 0 00-3 3v2h6V8a3 3 0 00-3-3z"></path>
+            </svg>
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-[#E67E66] to-transparent opacity-30 animate-[pulse_3s_ease-in-out_infinite]"></div>
+        </div>
+
+        {% if vr_device_connected %}
+            <div class="bg-[#E67E66]/15 text-[#E67E66] border border-eduhive-border px-6 py-4 rounded-xl font-bold shadow-sm mb-8 inline-block text-xl">
+                ✓ SYSTEM SYNCHRONIZED
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'vr_simulation' %}" class="block w-full sm:w-auto sm:inline-block bg-[#E67E66] text-white border border-eduhive-border px-8 py-4 rounded-xl font-bold text-xl shadow-card hover:bg-[#D66D56] hover:-translate-y-1 transition-all">
+                    Launch Immersive VR Space 🚀
+                </a>
+            </div>
+        {% else %}
+            <div class="bg-[#C85D44] text-white border border-eduhive-border px-6 py-4 rounded-xl font-bold shadow-sm mb-8 inline-block text-xl">
+                ⚠ AWAITING HARDWARE LINK
+            </div>
+            <div class="mt-4">
+                <p class="mb-4 font-bold text-slate-500">Please connect your Bright Kids VR headset to continue.</p>
+                <!-- Mock sync button -->
+                <a href="?sync_token=valid_hardware_123" class="inline-block bg-[#1A1A1A] text-white border border-eduhive-border px-6 py-3 rounded-xl font-bold shadow-card hover:opacity-90 transition-opacity">
+                    (Simulate Hardware Connection)
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

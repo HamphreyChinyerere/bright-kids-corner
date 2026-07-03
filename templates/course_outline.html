@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+
+{% block header_title %}{{ course.title }}{% endblock %}
+{% block page_subtitle %}
+    <a href="{% url 'course_list' %}" class="text-eduhive-muted hover:text-eduhive-accent">My Courses</a>
+    <span class="text-gray-300 mx-1">/</span>
+    <span>{{ course.title }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1000px] mx-auto space-y-6">
+
+    {% if just_enrolled %}
+    <div class="bg-[#E67E66]/10 border border-[#E67E66]/30 text-[#1A1A1A] rounded-2xl px-5 py-4 flex items-center gap-3">
+        <i class="ph-bold ph-check-circle text-[#E67E66] text-2xl"></i>
+        <div>
+            <p class="font-bold text-sm">You're enrolled!</p>
+            <p class="text-xs text-eduhive-muted mt-0.5">Exercises and projects were added to Assignments and Projects. Good luck!</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Hero -->
+    <div class="bg-white rounded-2xl shadow-card overflow-hidden">
+        <div class="relative h-48 md:h-56 bg-gray-100">
+            <img src="{{ course|course_thumbnail_url }}" alt="{{ course.title }}"
+                 class="w-full h-full object-cover" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 text-white">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    {% if is_enrolled %}
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-[#E67E66] px-3 py-1 rounded-full">Ongoing</span>
+                    {% endif %}
+                    <span class="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">{{ course.get_subject_display|default:course.subject }}</span>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-bold tracking-tight">{{ course.title }}</h1>
+                <p class="text-sm text-white/80 mt-1">{{ course.instructor_name }} · {{ course.duration_display }}</p>
+            </div>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <p class="text-sm text-eduhive-muted leading-relaxed max-w-3xl">{{ course.description }}</p>
+
+            <div class="flex flex-wrap gap-4 mt-5 text-xs text-eduhive-muted">
+                <span class="flex items-center gap-1"><i class="ph-bold ph-stack text-[#E67E66]"></i> {{ course.modules.count }} major topics</span>
+                <span class="flex items-center gap-1"><i class="ph-bold ph-video text-[#E67E66]"></i> {{ course.total_videos }} videos</span>
+                <span class="flex items-center gap-1"><i class="ph-bold ph-clipboard-text text-[#E67E66]"></i> Exercises in Assignments</span>
+                <span class="flex items-center gap-1"><i class="ph-bold ph-folders text-[#E67E66]"></i> Projects in Projects hub</span>
+            </div>
+
+            {% if is_enrolled %}
+            <div class="mt-6 p-4 bg-[#FDF3F1] rounded-xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-[#1A1A1A]">Your progress</span>
+                    <span class="text-sm font-bold text-[#E67E66]">{{ enrollment.progress_percent }}%</span>
+                </div>
+                <div class="w-full h-2 bg-white rounded-full overflow-hidden">
+                    <div class="h-full bg-[#E67E66] rounded-full transition-all duration-500"
+                         style="width: {{ enrollment.progress_percent }}%"></div>
+                </div>
+            </div>
+            {% else %}
+            <form method="post" action="{% url 'course_detail' slug=course.slug %}" id="enroll" class="mt-6">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="enroll">
+                <button type="submit"
+                        class="w-full sm:w-auto bg-[#E67E66] text-white px-8 py-3.5 rounded-full font-bold shadow-md shadow-[#E67E66]/30 hover:bg-[#D66D56] transition-all">
+                    <i class="ph-bold ph-play-circle mr-2"></i> Enroll Free — Start Learning
+                </button>
+                <p class="text-xs text-eduhive-muted mt-2">Adds exercises, projects, and the final exam to your workspace.</p>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Course outline -->
+    <div class="bg-white rounded-2xl shadow-card p-6 md:p-8">
+        <h2 class="text-lg font-bold text-[#1A1A1A] mb-1">Course outline</h2>
+        <p class="text-sm text-eduhive-muted mb-6">Each topic includes lessons, an exercise, and a hands-on project.</p>
+
+        <div class="space-y-4">
+            {% for row in module_rows %}
+            {% with module=row.module %}
+            <div class="border border-eduhive-border rounded-2xl p-5 hover:shadow-sm transition-shadow">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-[#E67E66]/10 text-[#E67E66] font-bold flex items-center justify-center shrink-0">
+                        {{ module.order }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                            <h3 class="font-bold text-[#1A1A1A]">{{ module.title }}</h3>
+                            {% if module.lesson_summary %}
+                            <span class="text-xs text-eduhive-muted bg-gray-50 px-2 py-1 rounded-full">{{ module.lesson_summary }}</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm text-eduhive-muted mb-4">{{ module.description }}</p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {% if module.exercise_title %}
+                            <div class="rounded-xl bg-[#FDF3F1] p-4 flex flex-col">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="ph-bold ph-clipboard-text text-[#E67E66]"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-eduhive-muted">Exercise</span>
+                                    {% if row.exercise_done %}
+                                    <span class="ml-auto text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Done</span>
+                                    {% endif %}
+                                </div>
+                                <p class="font-semibold text-sm text-[#1A1A1A] mb-1">{{ module.exercise_title }}</p>
+                                <p class="text-xs text-eduhive-muted flex-1">{{ module.exercise_description }}</p>
+                                {% if is_enrolled %}
+                                <a href="{% url 'assignment_workspace' %}"
+                                   class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#E67E66] hover:underline">
+                                    Open in Assignments <i class="ph-bold ph-arrow-right"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if module.project_title %}
+                            <div class="rounded-xl bg-[#FDF3F1] p-4 flex flex-col">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i class="ph-bold ph-folders text-[#E67E66]"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-eduhive-muted">Project</span>
+                                    {% if row.project_done %}
+                                    <span class="ml-auto text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Done</span>
+                                    {% endif %}
+                                </div>
+                                <p class="font-semibold text-sm text-[#1A1A1A] mb-1">{{ module.project_title }}</p>
+                                <p class="text-xs text-eduhive-muted flex-1">{{ module.project_description }}</p>
+                                {% if is_enrolled %}
+                                <a href="{% url 'projects_hub' %}"
+                                   class="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#E67E66] hover:underline">
+                                    Open in Projects <i class="ph-bold ph-arrow-right"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if module.coding_games.all %}
+                        <div class="mt-4 pt-4 border-t border-eduhive-border">
+                            <p class="text-xs font-bold uppercase tracking-wider text-eduhive-muted mb-3 flex items-center gap-2">
+                                <i class="ph-bold ph-game-controller text-[#E67E66]"></i> Interactive sandbox
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {% for game in module.coding_games.all %}
+                                <a href="{% url 'game_sandbox' game_id=game.id %}"
+                                   class="flex items-center gap-3 rounded-xl bg-white border border-eduhive-border p-4 hover:shadow-card-hover transition-all group">
+                                    <div class="w-10 h-10 rounded-xl bg-[#FDE2D9] flex items-center justify-center shrink-0 text-lg">
+                                        {% if game.game_type == 'scratch' %}🧩{% else %}💻{% endif %}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-sm text-[#1A1A1A] group-hover:text-[#E67E66] truncate">{{ game.title }}</p>
+                                        <p class="text-xs text-eduhive-muted">{{ game.get_game_type_display }}</p>
+                                    </div>
+                                    <i class="ph-bold ph-play-circle text-[#E67E66] text-xl shrink-0"></i>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+            {% empty %}
+            <p class="text-sm text-eduhive-muted text-center py-8">Course outline is being prepared.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Final exam -->
+    {% if final_exam %}
+    <div class="bg-white rounded-2xl shadow-card p-6 md:p-8 border-2 border-[#C85D44]/20">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-[#C85D44]/10 flex items-center justify-center shrink-0">
+                <i class="ph-bold ph-exam text-[#C85D44] text-2xl"></i>
+            </div>
+            <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h2 class="text-lg font-bold text-[#1A1A1A]">Final exam</h2>
+                    {% if exam_done %}
+                    <span class="text-[10px] font-bold text-white bg-[#C85D44] px-2 py-1 rounded-full">Completed</span>
+                    {% elif is_enrolled %}
+                    <span class="text-[10px] font-bold text-[#C85D44] bg-[#C85D44]/10 px-2 py-1 rounded-full">End of course</span>
+                    {% endif %}
+                </div>
+                <p class="font-semibold text-[#1A1A1A]">{{ final_exam.title }}</p>
+                <p class="text-sm text-eduhive-muted mt-2">{{ final_exam.description }}</p>
+                <p class="text-xs text-eduhive-muted mt-2"><i class="ph-bold ph-clock"></i> {{ final_exam.duration_minutes }} minutes</p>
+                {% if is_enrolled and not exam_done %}
+                <a href="{% url 'assignment_workspace' %}"
+                   class="inline-flex items-center gap-2 mt-4 bg-[#C85D44] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity">
+                    Take exam in Assignments <i class="ph-bold ph-arrow-right"></i>
+                </a>
+                {% elif not is_enrolled %}
+                <p class="text-xs text-eduhive-muted mt-3">Enroll to unlock the final exam in your Assignments workspace.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

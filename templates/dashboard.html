@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+
+{% block header_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ user.first_name|default:user.username }}! Let's continue your adventure!{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6">
+
+    <!-- ── Row 1: Stats Cards ──────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+        <!-- Streak -->
+        <div class="bg-white rounded-2xl p-5 flex items-center justify-between shadow-card hover:shadow-card-hover transition-shadow">
+            <div>
+                <p class="text-gray-400 text-xs font-medium mb-1">Current Streak</p>
+                <h3 class="text-2xl font-bold text-[#1A1A1A]">{{ progress.streak_days|default:0 }}</h3>
+                <p class="text-xs text-gray-400">days</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-2xl">🔥</div>
+        </div>
+
+        <!-- Points -->
+        <div class="bg-white rounded-2xl p-5 flex items-center justify-between shadow-card hover:shadow-card-hover transition-shadow">
+            <div>
+                <p class="text-gray-400 text-xs font-medium mb-1">Total Points</p>
+                <h3 class="text-2xl font-bold text-[#1A1A1A]">{{ progress.total_points_earned|default:0 }}</h3>
+                <p class="text-xs text-gray-400">points</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-yellow-50 flex items-center justify-center text-2xl">⭐</div>
+        </div>
+
+        <!-- Courses Enrolled -->
+        <div class="bg-white rounded-2xl p-5 flex items-center justify-between shadow-card hover:shadow-card-hover transition-shadow">
+            <div>
+                <p class="text-gray-400 text-xs font-medium mb-1">Courses</p>
+                <h3 class="text-2xl font-bold text-[#1A1A1A]">{{ recent_enrollments|length }}</h3>
+                <p class="text-xs text-gray-400">enrolled</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                <i class="ph-bold ph-book-open text-blue-400 text-xl"></i>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="bg-white rounded-2xl p-5 flex items-center justify-between shadow-card hover:shadow-card-hover transition-shadow">
+            <div>
+                <p class="text-gray-400 text-xs font-medium mb-1">Upcoming</p>
+                <h3 class="text-2xl font-bold text-[#1A1A1A]">{{ upcoming_events|length }}</h3>
+                <p class="text-xs text-gray-400">events</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center">
+                <i class="ph-bold ph-calendar-dots text-green-400 text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Row 2: Adventure Trail + Sidebar Widgets ────────────────────── -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Adventure Trail (takes 2/3) -->
+        <div class="lg:col-span-2 bg-white rounded-2xl p-8 shadow-card relative overflow-hidden">
+
+            <!-- Decorative background blobs -->
+            <div class="absolute -top-10 -right-10 w-48 h-48 bg-[#E67E66]/5 rounded-full pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-[#E67E66]/5 rounded-full pointer-events-none"></div>
+
+            <div class="flex items-center justify-between mb-8 relative z-10">
+                <div>
+                    <h2 class="text-xl font-bold text-[#1A1A1A]">Your Adventure Trail</h2>
+                    <p class="text-sm text-gray-400 mt-0.5">Node {{ progress.current_node_index }} of 10</p>
+                </div>
+                <!-- Overall progress bar -->
+                <div class="text-right">
+                    <p class="text-xs text-gray-400 mb-1">Overall Progress</p>
+                    <div class="w-32 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#E67E66] rounded-full transition-all duration-700"
+                             style="width: {{ progress.current_node_index|default:1 }}0%"></div>
+                    </div>
+                    <p class="text-xs text-[#E67E66] font-semibold mt-1">{{ progress.current_node_index|default:1 }}0%</p>
+                </div>
+            </div>
+
+            <div class="relative max-w-lg mx-auto">
+                <!-- Trail line -->
+                <div class="absolute left-1/2 top-0 bottom-0 w-1.5 bg-gray-100 -translate-x-1/2 rounded-full z-0"></div>
+
+                <div class="space-y-10 relative z-10 py-4">
+                    {% for node in adventure_nodes %}
+                    <div class="flex items-center justify-center relative group">
+
+                        <!-- Left label -->
+                        <div class="absolute left-0 w-5/12 pr-6 text-right hidden md:block">
+                            {% if node.status == 'completed' %}
+                                <span class="text-sm font-semibold text-gray-300">Stage {{ node.index }}</span>
+                                <p class="text-xs text-gray-300">Completed</p>
+                            {% elif node.status == 'active' %}
+                                <span class="text-sm font-bold text-[#E67E66]">Stage {{ node.index }}</span>
+                                <p class="text-xs text-[#E67E66]">In Progress</p>
+                            {% endif %}
+                        </div>
+
+                        {% if node.status == 'completed' %}
+                        <div class="w-14 h-14 bg-white border-[5px] border-[#E67E66] rounded-full flex items-center justify-center shadow-md z-10 transition-transform hover:scale-110 cursor-pointer group-hover:shadow-lg">
+                            <i class="ph-bold ph-check text-[#E67E66] text-xl"></i>
+                        </div>
+
+                        {% elif node.status == 'active' %}
+                        <div class="w-20 h-20 bg-[#E67E66] border-[6px] border-white rounded-full flex items-center justify-center shadow-xl shadow-[#E67E66]/40 z-10 ring-4 ring-[#FDE2D9] cursor-pointer
+                                    animate-pulse">
+                            <span class="font-bold text-2xl text-white">{{ node.index }}</span>
+                        </div>
+
+                        {% else %}
+                        <div class="w-11 h-11 bg-gray-100 border-4 border-white rounded-full flex items-center justify-center z-10 opacity-50 cursor-not-allowed shadow-sm">
+                            <i class="ph-bold ph-lock text-gray-400 text-sm"></i>
+                        </div>
+                        {% endif %}
+
+                        <!-- Right label -->
+                        <div class="absolute right-0 w-5/12 pl-6 hidden md:block">
+                            {% if node.status == 'active' %}
+                            <a href="{% url 'course_list' %}"
+                               class="inline-flex items-center gap-1 bg-[#E67E66] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow hover:bg-[#D66D56] transition-colors">
+                                <i class="ph-bold ph-play text-xs"></i> Continue
+                            </a>
+                            {% elif node.status == 'locked' %}
+                            <span class="text-xs text-gray-300">Stage {{ node.index }}</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column Widgets -->
+        <div class="space-y-5">
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-2xl p-5 shadow-card">
+                <h3 class="font-bold text-sm text-[#1A1A1A] mb-4">Quick Actions</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <a href="{% url 'course_list' %}"
+                       class="flex flex-col items-center gap-2 p-3 rounded-[14px] bg-[#FDF3F1] hover:bg-[#E67E66]/10 transition-colors group">
+                        <div class="w-9 h-9 rounded-full bg-[#E67E66]/10 flex items-center justify-center group-hover:bg-[#E67E66]/20 transition-colors">
+                            <i class="ph-bold ph-book-open text-[#E67E66] text-base"></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-600">Courses</span>
+                    </a>
+                    <a href="{% url 'games_library' %}"
+                       class="flex flex-col items-center gap-2 p-3 rounded-[14px] bg-purple-50 hover:bg-purple-100 transition-colors group">
+                        <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                            <i class="ph-bold ph-game-controller text-purple-500 text-base"></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-600">Games</span>
+                    </a>
+                    <a href="{% url 'vr_portal' %}"
+                       class="flex flex-col items-center gap-2 p-3 rounded-[14px] bg-blue-50 hover:bg-blue-100 transition-colors group">
+                        <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                            <i class="ph-bold ph-head-circuit text-blue-500 text-base"></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-600">VR Portal</span>
+                    </a>
+                    <a href="{% url 'calendar' %}"
+                       class="flex flex-col items-center gap-2 p-3 rounded-[14px] bg-green-50 hover:bg-green-100 transition-colors group">
+                        <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                            <i class="ph-bold ph-calendar-dots text-green-500 text-base"></i>
+                        </div>
+                        <span class="text-xs font-medium text-gray-600">Calendar</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Upcoming Events -->
+            <div class="bg-white rounded-2xl p-5 shadow-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-sm text-[#1A1A1A]">Upcoming Events</h3>
+                    <a href="{% url 'calendar' %}" class="text-xs text-[#E67E66] hover:underline font-medium">View all</a>
+                </div>
+
+                {% if upcoming_events %}
+                <div class="space-y-3">
+                    {% for event in upcoming_events %}
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                             style="background-color: {{ event.color }}"></div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-[#1A1A1A] truncate">{{ event.title }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5">
+                                {{ event.start_datetime|date:"M d, g:i A" }}
+                            </p>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0
+                            {% if event.event_type == 'lesson' %}bg-blue-100 text-blue-600
+                            {% elif event.event_type == 'assignment' %}bg-orange-100 text-orange-600
+                            {% elif event.event_type == 'exam' %}bg-red-100 text-red-600
+                            {% else %}bg-gray-100 text-gray-500{% endif %}">
+                            {{ event.event_type|capfirst }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="ph-bold ph-calendar-blank text-gray-200 text-4xl"></i>
+                    <p class="text-xs text-gray-400 mt-2">No upcoming events</p>
+                    <a href="{% url 'calendar' %}"
+                       class="text-xs text-[#E67E66] font-medium hover:underline mt-1 inline-block">Add one →</a>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Row 3: Recent Courses ───────────────────────────────────────── -->
+    <div class="bg-white rounded-2xl p-6 shadow-card">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="text-lg font-bold text-[#1A1A1A]">My Courses</h2>
+            <a href="{% url 'course_list' %}" class="text-sm text-[#E67E66] font-medium hover:underline">View all →</a>
+        </div>
+
+        {% if recent_enrollments %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for item in recent_enrollments %}
+            <a href="{% url 'course_detail' slug=item.course.slug %}"
+               class="block border border-gray-100 rounded-[18px] overflow-hidden hover:shadow-md transition-shadow group">
+                <!-- Thumbnail -->
+                <div class="relative h-32 bg-gray-100 overflow-hidden">
+                    <img src="{{ item.course|course_thumbnail_url }}"
+                         alt="{{ item.course.title }}"
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                         loading="lazy">
+                    <!-- Status badge -->
+                    <div class="absolute top-2 right-2">
+                        <span class="text-xs font-bold px-2 py-1 rounded-full
+                            {% if item.status == 'completed' %}bg-[#C85D44] text-white
+                            {% else %}bg-[#E67E66] text-white{% endif %}">
+                            {% if item.status == 'completed' %}✓ Done{% else %}Ongoing{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-4">
+                    <h4 class="font-semibold text-sm text-[#1A1A1A] leading-snug mb-2 truncate">
+                        {{ item.course.title }}
+                    </h4>
+
+                    <!-- Progress bar -->
+                    <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+                        <div class="h-full bg-[#E67E66] rounded-full transition-all"
+                             style="width: {{ item.progress_percent }}%"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-gray-400">{{ item.course.instructor_name|default:"Instructor" }}</span>
+                        <span class="text-xs font-bold text-[#E67E66]">{{ item.progress_percent }}%</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-10">
+            <i class="ph-bold ph-books text-gray-200 text-5xl"></i>
+            <p class="text-gray-400 text-sm mt-3">No courses enrolled yet.</p>
+            <a href="{% url 'course_list' %}"
+               class="inline-block mt-3 bg-[#E67E66] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#D66D56] transition-colors shadow-sm">
+                Browse Courses
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Row 4: VR + Games Promo Strip ──────────────────────────────── -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <!-- VR Portal Promo -->
+        <a href="{% url 'vr_portal' %}"
+           class="relative bg-gradient-to-br from-[#0F0C29] via-[#302B63] to-[#24243e] rounded-[24px] p-6 shadow-sm overflow-hidden group hover:shadow-xl transition-shadow">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-4 right-4 text-8xl">🥽</div>
+            </div>
+            <div class="relative z-10">
+                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                    <i class="ph-bold ph-head-circuit text-white text-xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-1">VR Learning Portal</h3>
+                <p class="text-white/60 text-sm mb-4">Explore 360° videos, WebXR scenes & space simulations</p>
+                <span class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors group-hover:bg-white/20">
+                    <i class="ph-bold ph-play"></i> Enter VR Portal
+                </span>
+            </div>
+        </a>
+
+        <!-- Games Promo -->
+        <a href="{% url 'games_library' %}"
+           class="relative bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-[24px] p-6 shadow-sm overflow-hidden group hover:shadow-xl transition-shadow">
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-4 right-4 text-8xl">🎮</div>
+            </div>
+            <div class="relative z-10">
+                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-4">
+                    <i class="ph-bold ph-game-controller text-white text-xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-1">Games Library</h3>
+                <p class="text-white/60 text-sm mb-4">Educational games for math, science, coding & more</p>
+                <span class="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors group-hover:bg-white/20">
+                    <i class="ph-bold ph-play"></i> Play Now
+                </span>
+            </div>
+        </a>
+
+    </div>
+
+</div>
+{% endblock content %}

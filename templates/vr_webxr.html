@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block header_title %}WebXR Interactive Scenes{% endblock %}
+{% block page_subtitle %}3D interactive educational environments inside your browser{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6">
+    <a href="{% url 'vr_portal' %}" class="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#F26A4F] font-medium transition-colors">
+        <i class="ph-bold ph-arrow-left"></i> Back to VR Portal
+    </a>
+
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-700 rounded-[24px] p-6 text-white flex items-center gap-4 shadow-lg">
+        <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 text-3xl">👓</div>
+        <div>
+            <h2 class="font-bold text-xl">Interactive WebXR Labs</h2>
+            <p class="text-white/70 text-sm mt-0.5">
+                Explore virtual labs running directly on Web standards. You can run these using your mouse/keyboard on your computer, or press the "Enter VR" button inside the scene if using a compatible VR headset browser.
+            </p>
+        </div>
+        <div class="ml-auto hidden md:flex items-center gap-2 flex-shrink-0">
+            <span class="bg-purple-400/20 text-purple-300 border border-purple-400/30 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+                <i class="ph-bold ph-cpu"></i> WebGL 2.0
+            </span>
+        </div>
+    </div>
+
+    {% if scenes %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {% for scene in scenes %}
+                <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                     onclick="launchXR('{{ scene.embed_url }}', '{{ scene.title }}')">
+                    
+                    <div class="h-48 bg-gradient-to-br from-purple-500 to-indigo-500 relative flex items-center justify-center overflow-hidden">
+                        {% if scene.thumbnail %}
+                            <img src="{{ scene.thumbnail.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ scene.title }}">
+                        {% else %}
+                            <span class="text-8xl opacity-60 group-hover:scale-110 transition-transform duration-500 select-none">🧩</span>
+                        {% endif %}
+                        
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                                <i class="ph-bold ph-binoculars text-purple-600 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-purple-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">WebXR App</div>
+                    </div>
+
+                    <div class="p-5">
+                        <h3 class="font-bold text-[#1E1E1E] mb-1 line-clamp-1">{{ scene.title }}</h3>
+                        <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">{{ scene.description|default:"No description provided for this interactive WebXR scene." }}</p>
+                        <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                            <span class="flex items-center gap-1"><i class="ph-bold ph-cube"></i> Three.js / A-Frame</span>
+                            <span class="text-purple-600 font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">Enter Lab <i class="ph-bold ph-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                 onclick="launchXR('https://aframe.io/aframe/examples/boilerplate/hello-mesh/', 'Interactive 3D Geometry Lab')">
+                <div class="h-48 bg-gradient-to-br from-indigo-900 to-purple-900 relative flex items-center justify-center overflow-hidden">
+                    <span class="text-7xl group-hover:scale-110 transition-transform duration-500 select-none">📐</span>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                            <i class="ph-bold ph-binoculars text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-purple-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Demo Scene</div>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-bold text-[#1E1E1E] mb-1">Interactive 3D Geometry Lab</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">Manipulate polygonal vertex geometry, wireframes, and custom rendering meshes in real-time.</p>
+                    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-cube"></i> A-Frame Engine</span>
+                        <span class="text-purple-600 font-semibold flex items-center gap-1">Enter Lab <i class="ph-bold ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                 onclick="launchXR('https://threejs.org/examples/webxr_vr_sandbox.html', 'Physics & Matter Collision Sandbox')">
+                <div class="h-48 bg-gradient-to-br from-slate-900 to-violet-900 relative flex items-center justify-center overflow-hidden">
+                    <span class="text-7xl group-hover:scale-110 transition-transform duration-500 select-none">🧪</span>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                            <i class="ph-bold ph-binoculars text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-purple-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Demo Scene</div>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-bold text-[#1E1E1E] mb-1">Physics & Matter Collision Sandbox</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">Experiment with real-time physics interactions, collisions, and gravity in a browser-based XR demo.</p>
+                    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-cube"></i> Three.js XR</span>
+                        <span class="text-purple-600 font-semibold flex items-center gap-1">Enter Lab <i class="ph-bold ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                 onclick="launchXR('https://aframe.io/aframe/examples/showcase/trippy/', 'WebXR VR Gallery Preview')">
+                <div class="h-48 bg-gradient-to-br from-violet-900 to-fuchsia-900 relative flex items-center justify-center overflow-hidden">
+                    <span class="text-7xl group-hover:scale-110 transition-transform duration-500 select-none">🎨</span>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                            <i class="ph-bold ph-binoculars text-purple-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-purple-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Demo Scene</div>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-bold text-[#1E1E1E] mb-1">WebXR VR Gallery Preview</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">Experience immersive art and spatial sound in a browser-based WebXR gallery environment.</p>
+                    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-cube"></i> A-Frame / WebXR</span>
+                        <span class="text-purple-600 font-semibold flex items-center gap-1">Enter Lab <i class="ph-bold ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div id="xr-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md items-center justify-center p-4">
+    <div class="bg-[#111827] w-full max-w-[1000px] rounded-[32px] overflow-hidden shadow-2xl border border-white/10 relative flex flex-col">
+        <div class="p-5 border-b border-white/10 flex items-center justify-between bg-[#111827]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-xl">🚀</div>
+                <h2 id="scene-title" class="font-bold text-white text-base md:text-lg">Loading Scene...</h2>
+            </div>
+            <button onclick="closeXR()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all text-xl">
+                <i class="ph-bold ph-x"></i>
+            </button>
+        </div>
+        <div class="relative width-full aspect-video bg-black">
+            <iframe id="scene-iframe" class="absolute inset-0 w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; vr; xr-spatial-tracking" allowfullscreen></iframe>
+        </div>
+        <div class="p-4 bg-[#111827] text-center text-xs text-white/40">
+            <i class="ph-bold ph-info"></i> Click inside the preview and use drag or headset controls to navigate your WebXR scene.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function launchXR(url, title) {
+        document.getElementById('scene-title').textContent = title;
+        let embedUrl = url;
+        if (url.includes('youtube.com/watch?v=')) {
+            embedUrl = url.replace('watch?v=', 'embed/');
+        }
+        document.getElementById('scene-iframe').src = embedUrl;
+        const modal = document.getElementById('xr-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeXR() {
+        document.getElementById('scene-iframe').src = '';
+        const modal = document.getElementById('xr-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    document.getElementById('xr-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeXR();
+    });
+</script>
+{% endblock %}

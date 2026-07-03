@@ -1,0 +1,32 @@
+{% load course_extras %}
+<div class="bg-white border border-[#F5E4DC] rounded-2xl p-5 shadow-card flex flex-col hover:shadow-card-hover dark:bg-neutral-900 dark:border-neutral-800 transition-shadow">
+    <div class="relative h-36 rounded-xl overflow-hidden bg-[#FFF6F2] dark:bg-neutral-800 mb-4">
+        <img src="{{ project.course|course_thumbnail_url }}" alt="" class="w-full h-full object-cover opacity-90">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+        {% if project.is_complete %}
+        <span class="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider bg-[#C85D44] text-white px-2.5 py-1 rounded-full">Finished</span>
+        {% else %}
+        <span class="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider bg-[#E67E66] text-white px-2.5 py-1 rounded-full">Ongoing</span>
+        {% endif %}
+    </div>
+    {% if project.module %}
+    <p class="text-[10px] font-bold uppercase tracking-wider text-eduhive-muted dark:text-neutral-500 mb-1">
+        Topic {{ project.module.order }} · {{ project.module.title }}
+    </p>
+    {% endif %}
+    <h3 class="text-lg font-bold text-[#1A1A1A] dark:text-white mb-2 leading-snug">{{ project.title }}</h3>
+    {% if project.module and project.module.project_description %}
+    <p class="text-xs text-eduhive-muted dark:text-neutral-400 mb-4 flex-1 line-clamp-2">{{ project.module.project_description }}</p>
+    {% else %}
+    <p class="text-xs text-eduhive-muted dark:text-neutral-400 mb-4 flex-1">Last updated {{ project.updated_at|date:"M j, Y" }}</p>
+    {% endif %}
+    <div class="flex flex-col gap-2 mt-auto">
+        <a href="{% url 'course_detail' slug=project.course.slug %}"
+           class="block text-center bg-[#E67E66] text-white px-4 py-2 rounded-xl font-bold text-sm hover:bg-[#D66D56] transition-colors">
+            {% if project.is_complete %}View course{% else %}Continue project{% endif %}
+        </a>
+        {% if not project.is_complete %}
+        <p class="text-[10px] text-center text-eduhive-muted dark:text-neutral-500">Save work in the sandbox to mark complete</p>
+        {% endif %}
+    </div>
+</div>

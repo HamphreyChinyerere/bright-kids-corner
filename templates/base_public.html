@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <title>{% block page_title %}Bright Kids Corner{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+    <style>
+        :root {
+            --eduhive-bg: #FDF3F1;
+            --eduhive-surface: #FFFFFF;
+            --eduhive-accent: #E67E66;
+            --eduhive-text: #1A1A1A;
+            --eduhive-muted: #71717A;
+            --eduhive-border: #F0E6E3;
+            --eduhive-radius: 16px;
+            --eduhive-shadow: 0 4px 24px rgba(26,26,26,0.06);
+        }
+        html.dark {
+            --eduhive-bg: #1E1F24;
+            --eduhive-surface: #26282E;
+            --eduhive-accent: #FDF0EA;
+            --eduhive-text: #F4F5F7;
+            --eduhive-muted: #A6ABB5;
+            --eduhive-border: #2F323A;
+            --eduhive-shadow: 0 10px 24px rgba(0,0,0,0.18);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+            background-color: var(--eduhive-bg);
+            color: var(--eduhive-text);
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .edu-card { background: var(--eduhive-surface); border-radius: var(--eduhive-radius); box-shadow: var(--eduhive-shadow); }
+        .edu-input { background: #FAF7F6; border: 1px solid var(--eduhive-border); border-radius: 12px; }
+        html.dark .edu-input { background: #24262B; border-color: #2F323A; color: #F4F5F7; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen flex items-center justify-center bg-[--eduhive-bg] dark:bg-[--eduhive-bg]">
+    <main class="w-full flex items-center justify-center min-h-screen px-4">
+        <div class="w-full max-w-md">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

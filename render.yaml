@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: bright-kids-corner
+    env: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: gunicorn bright_project.wsgi:application --bind 0.0.0.0:$PORT
+    databases:
+      - bright-kids-corner-db
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: bright_project.settings
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "localhost,127.0.0.1"
+      # Set DJANGO_SECRET_KEY in Render dashboard secrets for production.
+      # Optional: set DJANGO_TRUSTED_ORIGINS to a comma-separated list of trusted domains.
+
+databases:
+  - name: bright-kids-corner-db
+    engine: postgresql
+    plan: free

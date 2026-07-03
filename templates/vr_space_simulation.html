@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Interactive Simulations{% endblock %}
+{% block page_subtitle %}Virtual labs, mathematics modules, and cosmic sandboxes{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto space-y-6">
+    <a href="{% url 'vr_portal' %}" class="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-[#F26A4F] font-medium transition-colors">
+        <i class="ph-bold ph-arrow-left"></i> Back to VR Portal
+    </a>
+
+    <div class="bg-gradient-to-r from-indigo-600 to-blue-700 rounded-[24px] p-6 text-white flex items-center gap-4 shadow-lg">
+        <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 text-3xl">🧪</div>
+        <div>
+            <h2 class="font-bold text-xl">Interactive Scientific Simulations</h2>
+            <p class="text-white/70 text-sm mt-0.5">
+                Interact with physics, chemistry, biology, and space exploration algorithms directly in your browser viewport. Run laboratory experiments safely with real-time vector modeling data.
+            </p>
+        </div>
+        <div class="ml-auto hidden md:flex items-center gap-2 flex-shrink-0">
+            <span class="bg-indigo-400/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1">
+                <i class="ph-bold ph-atom"></i> PhET & HTML5 Active
+            </span>
+        </div>
+    </div>
+
+    {% if simulations %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {% for sim in simulations %}
+                <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                     onclick="launchSim('{{ sim.embed_url }}', '{{ sim.title }}')">
+                    
+                    <div class="h-48 bg-gradient-to-br from-indigo-500 to-blue-500 relative flex items-center justify-center overflow-hidden">
+                        {% if sim.thumbnail %}
+                            <img src="{{ sim.thumbnail.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="{{ sim.title }}">
+                        {% else %}
+                            <span class="text-8xl opacity-60 group-hover:scale-110 transition-transform duration-500 select-none">🔬</span>
+                        {% endif %}
+                        
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                            <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                                <i class="ph-bold ph-play text-indigo-500 text-2xl"></i>
+                            </div>
+                        </div>
+                        <div class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Interactive</div>
+                    </div>
+
+                    <div class="p-5">
+                        <h3 class="font-bold text-[#1E1E1E] mb-1 line-clamp-1">{{ sim.title }}</h3>
+                        <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">{{ sim.description|default:"No description provided for this interactive simulation module." }}</p>
+                        <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                            <span class="flex items-center gap-1"><i class="ph-bold ph-flask"></i> Science Lab Module</span>
+                            <span class="text-indigo-500 font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">Launch Sim <i class="ph-bold ph-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                 onclick="launchSim('https://solarsystemscope.com/iframe', 'Solar System Explorer')">
+                <div class="h-48 bg-gradient-to-br from-[#0F0C29] to-indigo-800 relative flex items-center justify-center overflow-hidden">
+                    <span class="text-8xl opacity-60 group-hover:scale-110 transition-transform duration-500 select-none">🌍</span>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                            <i class="ph-bold ph-play text-indigo-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">Live Simulation</div>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-bold text-[#1E1E1E] mb-1">Solar System Scope Explorer</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">Real-time dynamic 3D simulation tracker of planetary alignment configurations, gravity wells, and planetary orbits.</p>
+                    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-planet"></i> Astronomy Lab</span>
+                        <span class="text-indigo-500 font-semibold flex items-center gap-1">Launch Sim <i class="ph-bold ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[24px] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer" 
+                 onclick="launchSim('https://phet.colorado.edu/sims/html/balancing-chemical-equations/latest/balancing-chemical-equations_all.html', 'PhET Chemistry: Balancing Chemical Equations')">
+                <div class="h-48 bg-gradient-to-br from-[#243B55] to-[#141E30] relative flex items-center justify-center overflow-hidden">
+                    <span class="text-8xl opacity-60 group-hover:scale-110 transition-transform duration-500 select-none">🧪</span>
+                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div class="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all scale-75 group-hover:scale-100 shadow-lg">
+                            <i class="ph-bold ph-play text-indigo-500 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full">PhET Interactive</div>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-bold text-[#1E1E1E] mb-1">Balancing Chemical Equations</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2 leading-relaxed">Interactive conservation of matter visualization engine. Learn to balance coefficients dynamically through visual weights.</p>
+                    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-xs text-gray-400">
+                        <span class="flex items-center gap-1"><i class="ph-bold ph-flask"></i> Chemistry Lab</span>
+                        <span class="text-indigo-500 font-semibold flex items-center gap-1">Launch Sim <i class="ph-bold ph-arrow-right"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div id="sim-modal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-md items-center justify-center p-0 md:p-6">
+    <div class="bg-[#0C0E12] w-full h-full max-w-[1240px] max-h-[820px] md:rounded-[32px] overflow-hidden shadow-2xl border border-white/10 relative flex flex-col">
+        <div class="p-5 border-b border-white/10 flex items-center justify-between bg-[#121620]">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-xl">🧬</div>
+                <h2 id="sim-title" class="font-bold text-white text-base md:text-lg">Loading Simulation Model...</h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleSimFullScreen()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all text-lg hidden md:flex" title="Toggle Fullscreen View">
+                    <i class="ph-bold ph-corners-out"></i>
+                </button>
+                <button onclick="closeSim()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all text-xl">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+        </div>
+        <div class="relative flex-1 bg-black overflow-hidden" id="sim-container">
+            <iframe id="sim-iframe" class="absolute inset-0 w-full h-full border-0 bg-white" allow="autoplay; fullscreen; camera; geolocation; midi; microphone; speaker; payment; gyroscope; accelerometer" allowfullscreen></iframe>
+        </div>
+        <div class="p-4 bg-[#121620] border-t border-white/5 text-center text-xs text-white/40 flex items-center justify-center gap-2">
+            <i class="ph-bold ph-info"></i> Interact using your cursor mechanics directly inside the panel viewport frame. Use the fullscreen icon to scale space size.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function launchSim(url, title) {
+        document.getElementById('sim-title').textContent = title;
+        document.getElementById('sim-iframe').src = url;
+        const modal = document.getElementById('sim-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeSim() {
+        document.getElementById('sim-iframe').src = '';
+        const modal = document.getElementById('sim-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
+    }
+
+    function toggleSimFullScreen() {
+        const container = document.getElementById('sim-container');
+        if (!document.fullscreenElement) {
+            container.requestFullscreen().catch(err => {
+                console.error(`Error attempting to engage simulation fullscreen metrics: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+
+    document.getElementById('sim-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeSim();
+    });
+</script>
+{% endblock %}
+

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Execute immediately before DOM rendering to avoid flashing
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <title>{% block page_title %}Bright Kids Corner{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eduhive: {
+                            bg: '#FDF3F1',
+                            canvas: '#FDE2D9',
+                            surface: '#FFFFFF',
+                            accent: '#E67E66',
+                            'accent-hover': '#D66D56',
+                            'accent-deep': '#C85D44',
+                            text: '#1A1A1A',
+                            muted: '#71717A',
+                            'muted-light': '#8A8A8A',
+                            border: '#F0E6E3',
+                            dark: {
+                                bg: '#1E1F24',
+                                surface: '#26282E',
+                                panel: '#24262B',
+                                border: '#2F323A',
+                                accent: '#FDF0EA',
+                                'accent-hover': '#F5E4DC',
+                                text: '#F4F5F7',
+                                muted: '#A6ABB5',
+                            },
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        card: '16px',
+                    },
+                    boxShadow: {
+                        card: '0 4px 24px rgba(26, 26, 26, 0.06)',
+                        'card-hover': '0 8px 32px rgba(26, 26, 26, 0.08)',
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons CDN -->
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js"></script>
+    <style>
+        /* ── Eduhive design tokens ─────────────────────────────── */
+        :root {
+            --eduhive-bg: #FDF3F1;
+            --eduhive-canvas: #FDE2D9;
+            --eduhive-surface: #FFFFFF;
+            --eduhive-accent: #E67E66;
+            --eduhive-accent-hover: #D66D56;
+            --eduhive-accent-deep: #C85D44;
+            --eduhive-text: #1A1A1A;
+            --eduhive-muted: #71717A;
+            --eduhive-muted-light: #8A8A8A;
+            --eduhive-border: #F0E6E3;
+            --eduhive-radius: 16px;
+            --eduhive-shadow: 0 4px 24px rgba(26, 26, 26, 0.06);
+            --eduhive-shadow-hover: 0 8px 32px rgba(26, 26, 26, 0.08);
+        }
+
+        /* ── Base ──────────────────────────────────────────────── */
+        html.dark body {
+            background-color: #1E1F24;
+            color: #F4F5F7;
+        }
+        html.dark {
+            --eduhive-bg: #1E1F24;
+            --eduhive-canvas: #1C1D21;
+            --eduhive-surface: #26282E;
+            --eduhive-panel: #24262B;
+            --eduhive-accent: #FDF0EA;
+            --eduhive-accent-hover: #F5E4DC;
+            --eduhive-accent-deep: #EAD7CE;
+            --eduhive-text: #F4F5F7;
+            --eduhive-muted: #A6ABB5;
+            --eduhive-muted-light: #7E8490;
+            --eduhive-border: #2F323A;
+            --eduhive-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+            --eduhive-shadow-hover: 0 16px 34px rgba(0, 0, 0, 0.24);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            letter-spacing: -0.01em;
+        }
+        h1, h2, h3, h4, h5, h6 { letter-spacing: -0.02em; }
+
+        /* Semantic grays → Eduhive palette */
+        .text-gray-300 { color: #C4C4C4 !important; }
+        .text-gray-400 { color: var(--eduhive-muted-light) !important; }
+        .text-gray-500 { color: var(--eduhive-muted) !important; }
+        .text-gray-600 { color: #5C5C5C !important; }
+        .border-gray-50 { border-color: #FAF7F6 !important; }
+        .border-gray-100 { border-color: var(--eduhive-border) !important; }
+        .bg-gray-50 { background-color: #FAF7F6 !important; }
+        .bg-gray-100 { background-color: #F5EFED !important; }
+        .divide-gray-50 > :not([hidden]) ~ :not([hidden]) { border-color: #FAF7F6 !important; }
+
+        /* Coral canvas content area (frames white cards) */
+        #main-scroll {
+            background-color: #FDF0EA;
+        }
+        html.dark #main-scroll {
+            background-color: #1E1F24 !important;
+        }
+        /* Global dark-mode translation layer for legacy light-mode utilities. */
+        html.dark header,
+        html.dark #app-sidebar,
+        html.dark .bg-white,
+        html.dark .bg-gray-50,
+        html.dark [class*="dark:bg-neutral-900"],
+        html.dark [class*="dark:bg-neutral-800"],
+        html.dark [class*="bg-[#FFFFFF]"],
+        html.dark [class*="bg-[#ffffff]"],
+        html.dark [class*="bg-[#F9FAFB]"] {
+            background-color: #26282E !important;
+        }
+        html.dark .bg-gray-100,
+        html.dark .bg-slate-100,
+        html.dark .bg-slate-200,
+        html.dark .bg-purple-50,
+        html.dark .bg-orange-50,
+        html.dark .bg-yellow-50,
+        html.dark .bg-green-50,
+        html.dark .bg-emerald-100,
+        html.dark .bg-blue-100,
+        html.dark .bg-pink-100,
+        html.dark .bg-green-100,
+        html.dark .bg-purple-100,
+        html.dark .bg-orange-100,
+        html.dark .bg-amber-100,
+        html.dark .bg-teal-100,
+        html.dark [class*="bg-[#FDF0EA]"],
+        html.dark [class*="bg-[#FDF3F1]"],
+        html.dark [class*="bg-[#FFF6F2]"],
+        html.dark [class*="bg-[#FDE2D9]"],
+        html.dark [class*="bg-[#FAF7F6]"],
+        html.dark [class*="bg-[#F5EFED]"],
+        html.dark [class*="bg-[#FFFBF2]"],
+        html.dark [class*="bg-[#F5FBFF]"],
+        html.dark [class*="bg-[#F4FFEF]"],
+        html.dark [class*="bg-[#FFF3CD]"],
+        html.dark [class*="bg-[#E2F0FF]"] {
+            background-color: #24262B !important;
+        }
+        html.dark [class*="bg-[#1A1A1A]"] {
+            background-color: #2F323A !important;
+        }
+        html.dark .border-eduhive-border,
+        html.dark .border-gray-50,
+        html.dark .border-gray-100,
+        html.dark [class*="dark:border-neutral-800"],
+        html.dark [class*="dark:border-neutral-700"],
+        html.dark [class*="dark:border-neutral-800/50"],
+        html.dark .border-black/10,
+        html.dark .border-black/20,
+        html.dark [class*="border-[#F5E4DC]"],
+        html.dark [class*="border-[#F0E6E3]"],
+        html.dark [class*="border-[#FAF7F6]"],
+        html.dark [class*="border-[#F8E3C9]"],
+        html.dark [class*="border-[#D9E9FF]"],
+        html.dark [class*="border-[#DAF5DD]"],
+        html.dark [class*="border-[#E5E7EB]"] {
+            border-color: #2F323A !important;
+        }
+        html.dark [class~="text-[#1A1A1A]"],
+        html.dark [class~="text-[#1E1E1E]"],
+        html.dark .text-eduhive-text,
+        html.dark .text-gray-100,
+        html.dark .text-gray-200 {
+            color: #F4F5F7 !important;
+        }
+        html.dark .text-eduhive-muted,
+        html.dark .text-eduhive-muted-light,
+        html.dark .text-gray-300,
+        html.dark .text-gray-400,
+        html.dark .text-gray-500,
+        html.dark .text-gray-600,
+        html.dark .text-slate-500,
+        html.dark .text-slate-600 {
+            color: #A6ABB5 !important;
+        }
+        html.dark .text-white { color: #fff !important; }
+        html.dark .hover\:bg-slate-100:hover,
+        html.dark .hover\:bg-slate-200:hover,
+        html.dark .hover\:bg-gray-50:hover,
+        html.dark .hover\:bg-gray-100:hover,
+        html.dark [class*="hover:bg-[#FDF0EA]"]:hover,
+        html.dark [class*="hover:bg-[#FDF3F1]"]:hover,
+        html.dark [class*="hover:bg-[#FDE2D9]"]:hover,
+        html.dark [class*="hover:bg-white"]:hover {
+            background-color: #2F323A !important;
+        }
+        html.dark [style*="background-color: #FFFFFF"],
+        html.dark [style*="background-color:#FFFFFF"] {
+            background-color: #26282E !important;
+        }
+        html.dark [class*="hover:text-[#1A1A1A]"]:hover,
+        html.dark [class*="hover:text-[#1E1E1E]"]:hover {
+            color: #F4F5F7 !important;
+        }
+        html.dark .bg-eduhive-accent,
+        html.dark [class~="bg-[#E67E66]"],
+        html.dark [class~="bg-[#F26A4F]"],
+        html.dark [class~="bg-[#D05A3F]"] {
+            background-color: #FDF0EA !important;
+            color: #1E1F24 !important;
+        }
+        html.dark .hover\:bg-eduhive-accent-hover:hover,
+        html.dark [class*="hover:bg-[#D66D56]"]:hover,
+        html.dark [class*="hover:bg-[#e05a3f]"]:hover,
+        html.dark [class*="hover:bg-[#b84e35]"]:hover {
+            background-color: #F5E4DC !important;
+        }
+        html.dark .text-eduhive-accent,
+        html.dark [class~="text-[#E67E66]"],
+        html.dark [class~="text-[#F26A4F]"],
+        html.dark [class~="text-[#D05A3F]"] {
+            color: #FDF0EA !important;
+        }
+        html.dark .hover\:text-eduhive-accent:hover,
+        html.dark [class*="hover:text-[#E67E66]"]:hover,
+        html.dark [class*="hover:text-[#F26A4F]"]:hover {
+            color: #F5E4DC !important;
+        }
+        html.dark .border-eduhive-accent,
+        html.dark [class*="border-[#E67E66]"],
+        html.dark [class*="border-[#F26A4F]"] {
+            border-color: #FDF0EA !important;
+        }
+        html.dark [class*="bg-eduhive-accent/"],
+        html.dark [class*="bg-[#E67E66]/"],
+        html.dark [class*="bg-[#F26A4F]/"] {
+            background-color: rgba(253, 240, 234, 0.12) !important;
+        }
+        html.dark [class*="border-eduhive-accent/"],
+        html.dark [class*="border-[#E67E66]/"],
+        html.dark [class*="border-[#F26A4F]/"] {
+            border-color: rgba(253, 240, 234, 0.32) !important;
+        }
+        html.dark .shadow-sm,
+        html.dark .shadow-md,
+        html.dark .shadow-card {
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18) !important;
+        }
+        html.dark .shadow-lg,
+        html.dark .shadow-xl,
+        html.dark .shadow-card-hover,
+        html.dark .hover\:shadow-card-hover:hover {
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24) !important;
+        }
+
+        /* Card surfaces */
+        .edu-card {
+            background: var(--eduhive-surface);
+            border-radius: var(--eduhive-radius);
+            box-shadow: var(--eduhive-shadow);
+        }
+        .edu-card:hover { box-shadow: var(--eduhive-shadow-hover); }
+
+        /* Form inputs (profile-style) */
+        .edu-input {
+            background: #FAF7F6;
+            border: 1px solid var(--eduhive-border);
+            border-radius: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .edu-input:focus {
+            outline: none;
+            border-color: rgba(230, 126, 102, 0.5);
+            box-shadow: 0 0 0 3px rgba(230, 126, 102, 0.12);
+        }
+        .edu-input::placeholder { color: #B8B8B8; }
+        html.dark .edu-card {
+            background: #26282E;
+            border-color: #2F323A;
+            box-shadow: var(--eduhive-shadow);
+        }
+        html.dark .edu-input {
+            background: #24262B;
+            border-color: #2F323A;
+            color: #F4F5F7;
+        }
+        html.dark .edu-input:focus {
+            border-color: rgba(253, 240, 234, 0.55);
+            box-shadow: 0 0 0 3px rgba(253, 240, 234, 0.14);
+        }
+        html.dark .edu-input::placeholder { color: #7E8490; }
+
+        /* ── Scrollbar ─────────────────────────────────────────── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #E8D4CF; border-radius: 999px; }
+        html.dark ::-webkit-scrollbar-thumb { background: #2F323A; }
+
+        /* ── VR submenu animation ──────────────────────────────── */
+        .vr-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .vr-submenu.open { max-height: 300px; }
+
+        /* ── Active nav pill (terracotta) ──────────────────────── */
+        .active-nav {
+            background-color: var(--eduhive-accent);
+            color: white !important;
+            box-shadow: 0 4px 14px rgba(230, 126, 102, 0.35);
+        }
+        .active-nav i { color: white !important; }
+        html.dark .active-nav {
+            background-color: #FDF0EA;
+            color: #1E1F24 !important;
+            box-shadow: 0 8px 22px rgba(253, 240, 234, 0.14);
+        }
+
+        /* ── Sidebar nav hover — slight raised shadow ──────────── */
+        aside nav a,
+        aside nav #vr-menu-btn {
+            transition: color 0.2s ease, background-color 0.2s ease,
+                        box-shadow 0.25s ease, transform 0.25s ease;
+        }
+        aside nav a:not(.active-nav):hover,
+        aside nav #vr-menu-btn:not(.active-nav):hover {
+            box-shadow: 0 4px 12px rgba(26, 26, 26, 0.1),
+                        0 2px 4px rgba(26, 26, 26, 0.06);
+            transform: translateY(-1px);
+        }
+        aside nav a.active-nav:hover,
+        aside nav #vr-menu-btn.active-nav:hover {
+            box-shadow: 0 6px 18px rgba(230, 126, 102, 0.42);
+            transform: translateY(-1px);
+        }
+        html.dark aside nav a:not(.active-nav):hover,
+        html.dark aside nav #vr-menu-btn:not(.active-nav):hover {
+            background-color: #2F323A !important;
+            color: #F4F5F7 !important;
+            box-shadow: none;
+        }
+        html.dark aside nav a.active-nav:hover,
+        html.dark aside nav #vr-menu-btn.active-nav:hover {
+            background-color: #F5E4DC;
+            box-shadow: 0 10px 24px rgba(253, 240, 234, 0.18);
+        }
+
+        /* Light / Dark mode toggle (Eduhive pill) */
+        #theme-toggle {
+            background: #F5EFED;
+            border-radius: 9999px;
+            padding: 4px;
+        }
+        #theme-toggle button.theme-active {
+            background: #1A1A1A;
+            color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(26, 26, 26, 0.15);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        #theme-toggle button.theme-inactive {
+            background: transparent;
+            color: var(--eduhive-muted);
+        }
+        html.dark #theme-toggle {
+            background: #1E1F24;
+            border: 1px solid #2F323A;
+        }
+        /* Ensure inactive pill is legible on dark backgrounds by adding a subtle fill */
+        html.dark #theme-toggle button.theme-inactive {
+            color: #A6ABB5;
+            background: rgba(255,255,255,0.02);
+        }
+        html.dark #theme-toggle button.theme-active {
+            background: #FDF0EA;
+            color: #1E1F24;
+            box-shadow: 0 8px 20px rgba(253, 240, 234, 0.14);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        /* ── Tooltip ───────────────────────────────────────────── */
+        .sidebar-tooltip {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .group:hover .sidebar-tooltip { opacity: 1; }
+
+        /* ── Collapsible sidebar (md+) ───────────────────────── */
+        #sidebar-toggle-btn { position: relative; }
+        :root {
+            --sidebar-width-expanded: 16rem;
+            --sidebar-width-collapsed: 4.5rem;
+        }
+        @media (min-width: 768px) {
+            #app-sidebar {
+                width: var(--sidebar-width-expanded);
+            }
+            body.sidebar-collapsed #app-sidebar {
+                width: var(--sidebar-width-collapsed);
+            }
+            body.sidebar-collapsed .sidebar-brand-text,
+            body.sidebar-collapsed .sidebar-section-title,
+            body.sidebar-collapsed .sidebar-collapse-when-narrow {
+                display: none !important;
+            }
+            body.sidebar-collapsed .sidebar-logo-wrap {
+                justify-content: center;
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+            body.sidebar-collapsed #sidebar-toggle-btn {
+                position: absolute;
+                right: 50%;
+                transform: translateX(50%);
+                top: auto;
+                bottom: -0.25rem;
+            }
+            body.sidebar-collapsed aside nav {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            body.sidebar-collapsed aside nav a,
+            body.sidebar-collapsed aside nav #vr-menu-btn,
+            body.sidebar-collapsed aside .sidebar-footer-link,
+            body.sidebar-collapsed aside nav button[type="submit"] {
+                font-size: 0;
+                justify-content: center;
+                gap: 0;
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+            body.sidebar-collapsed aside nav a i.ph-bold,
+            body.sidebar-collapsed aside nav #vr-menu-btn > i.ph-bold:first-child,
+            body.sidebar-collapsed aside .sidebar-footer-link i,
+            body.sidebar-collapsed aside nav button[type="submit"] i.ph-bold {
+                font-size: 1.25rem;
+            }
+            body.sidebar-collapsed #vr-caret,
+            body.sidebar-collapsed #vr-menu-btn > span.flex-1 {
+                display: none;
+            }
+            body.sidebar-collapsed #vr-submenu:not(.open) {
+                max-height: 0;
+            }
+            body.sidebar-collapsed #vr-nav-group {
+                position: relative;
+            }
+            body.sidebar-collapsed #vr-nav-group #vr-submenu {
+                max-height: none !important;
+                overflow: visible;
+            }
+            body.sidebar-collapsed #vr-nav-group:not(:hover) #vr-submenu:not(.open) {
+                max-height: 0 !important;
+                overflow: hidden;
+            }
+            body.sidebar-collapsed #vr-nav-group:hover #vr-submenu,
+            body.sidebar-collapsed #vr-nav-group #vr-submenu.open {
+                position: absolute;
+                left: calc(100% + 6px);
+                top: 0;
+                width: 13rem;
+                background: var(--eduhive-surface);
+                border-radius: 1rem;
+                box-shadow: var(--eduhive-shadow-hover);
+                border: 1px solid var(--eduhive-border);
+                padding: 0.5rem;
+                z-index: 60;
+                max-height: 20rem !important;
+            }
+            body.sidebar-collapsed #vr-nav-group:hover #vr-submenu .ml-4,
+            body.sidebar-collapsed #vr-nav-group #vr-submenu.open .ml-4 {
+                margin-left: 0;
+                border-left: none;
+                padding-left: 0;
+            }
+            body.sidebar-collapsed #vr-nav-group:hover #vr-submenu a,
+            body.sidebar-collapsed #vr-nav-group #vr-submenu.open a {
+                font-size: 0.875rem;
+            }
+            body.sidebar-collapsed #theme-toggle {
+                flex-direction: column;
+                gap: 4px;
+            }
+            body.sidebar-collapsed #theme-toggle button {
+                width: 100%;
+                font-size: 0;
+            }
+            body.sidebar-collapsed #theme-toggle button i {
+                font-size: 1rem;
+            }
+            body.sidebar-collapsed .sidebar-logout-wrap {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+                display: flex;
+                justify-content: center;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-[#FDF0EA] dark:bg-[#1E1F24] text-eduhive-text dark:text-[#F4F5F7] min-h-screen flex flex-col md:flex-row mx-auto transition-colors duration-200">
+<script>
+(function () {
+    try {
+        if (window.innerWidth >= 768 && localStorage.getItem('bk_sidebar_collapsed') === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+    } catch (e) {}
+})();
+</script>
+
+    <!-- ════════════════════════════════════════════════════════════
+         SIDEBAR
+    ════════════════════════════════════════════════════════════ -->
+    <aside id="app-sidebar" class="w-full md:w-64 bg-white dark:bg-[#26282E] flex flex-col flex-shrink-0 z-20 relative border-r border-eduhive-border dark:border-[#2F323A] shadow-[2px_0_24px_rgba(26,26,26,0.04)] transition-all duration-300">
+
+        <!-- Logo -->
+        <div class="p-6 flex items-center gap-3 sidebar-logo-wrap relative">
+            <div class="w-10 h-10 flex-shrink-0 bg-eduhive-accent text-white rounded-full flex items-center justify-center font-bold text-xl shadow-md shadow-eduhive-accent/30">
+                B
+            </div>
+            <div class="sidebar-brand-text min-w-0 flex-1">
+                <h1 class="font-bold text-xl tracking-tight text-eduhive-text leading-none">
+                    Bright Kids Corner
+                </h1>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    Student Dashboard
+                </p>
+            </div>
+            <button type="button" id="sidebar-toggle-btn" aria-label="Minimize sidebar" aria-expanded="true"
+                    class="hidden md:flex flex-shrink-0 w-10 h-10 rounded-full bg-gray-50 border border-eduhive-border text-eduhive-muted hover:text-eduhive-accent hover:bg-white items-center justify-center transition-all">
+                <i class="ph-bold ph-caret-double-left text-sm" id="sidebar-toggle-icon"></i>
+            </button>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-0.5 overflow-y-auto pb-4">
+
+            <div class="px-2 py-2 text-xs font-semibold text-gray-400 tracking-wider sidebar-section-title">MAIN MENU</div>
+
+            <!-- Dashboard -->
+            <a href="{% url 'dashboard' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                      {% if request.resolver_match.url_name == 'dashboard' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                <i class="ph-bold ph-squares-four text-xl"></i> Dashboard
+            </a>
+
+            <!-- My Courses -->
+            <a href="{% url 'course_list' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                      {% if request.resolver_match.url_name == 'course_list' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                <i class="ph-bold ph-book-open text-xl"></i> My Courses
+            </a>
+
+            <!-- Assignment -->
+            <a href="{% url 'assignment_workspace' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                      {% if request.resolver_match.url_name == 'assignment_workspace' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                <i class="ph-bold ph-clipboard-text text-xl"></i> Assignment
+            </a>
+
+            <!-- Projects -->
+            <a href="{% url 'projects_hub' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                      {% if request.resolver_match.url_name == 'projects_hub' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                <i class="ph-bold ph-folders text-xl"></i> Projects
+            </a>
+
+            <!-- Calendar -->
+            <a href="{% url 'calendar' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                      {% if request.resolver_match.url_name == 'calendar' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                <i class="ph-bold ph-calendar-dots text-xl"></i> Calendar
+            </a>
+
+            <!-- Games -->
+            <a href="{% url 'games_library' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                      {% if request.resolver_match.url_name == 'games_library' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                <i class="ph-bold ph-game-controller text-xl"></i> Games
+            </a>
+
+            <!-- VR Portal (expandable) -->
+            <div id="vr-nav-group">
+                <button onclick="toggleVRMenu()"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                               {% if 'vr' in request.resolver_match.url_name %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}"
+                        id="vr-menu-btn">
+                    <i class="ph-bold ph-head-circuit text-xl"></i>
+                    <span class="flex-1 text-left">VR Portal</span>
+                    <i class="ph-bold ph-caret-down text-sm transition-transform duration-300" id="vr-caret"></i>
+                </button>
+
+                <!-- VR Sub-menu -->
+                <div class="vr-submenu {% if 'vr' in request.resolver_match.url_name %}open{% endif %}" id="vr-submenu">
+                    <div class="ml-4 mt-1 space-y-0.5 border-l-2 border-eduhive-accent/20 pl-3">
+
+                        <a href="{% url 'vr_portal' %}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors
+                                  {% if request.resolver_match.url_name == 'vr_portal' %}text-eduhive-accent bg-eduhive-accent/10{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                            <i class="ph-bold ph-broadcast text-base"></i> VR Hub
+                        </a>
+
+                        <a href="{% url 'vr_360' %}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors
+                                  {% if request.resolver_match.url_name == 'vr_360' %}text-eduhive-accent bg-eduhive-accent/10{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                            <i class="ph-bold ph-360 text-base"></i> 360° Videos
+                        </a>
+
+                        <a href="{% url 'vr_webxr' %}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors
+                                  {% if request.resolver_match.url_name == 'vr_webxr' %}text-eduhive-accent bg-eduhive-accent/10{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                            <i class="ph-bold ph-cube-focus text-base"></i> WebXR Scenes
+                        </a>
+
+                        <a href="{% url 'vr_simulation' %}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors
+                                  {% if request.resolver_match.url_name == 'vr_simulation' %}text-eduhive-accent bg-eduhive-accent/10{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                            <i class="ph-bold ph-planet text-base"></i> Simulations
+                        </a>
+
+                        <a href="{% url 'vr_coming_soon' %}"
+                           class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-colors
+                                  {% if request.resolver_match.url_name == 'vr_coming_soon' %}text-eduhive-accent bg-eduhive-accent/10{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                            <i class="ph-bold ph-sparkle text-base"></i> Coming Soon
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+            {% if not is_streamlined_view %}
+            <!-- ── Other Menu ──────────────────────────────── -->
+            <div class="pt-3 mt-3 border-t border-gray-100">
+                <div class="px-2 py-2 text-xs font-semibold text-gray-400 tracking-wider mb-1 sidebar-section-title">OTHER MENU</div>
+
+                <a href="{% url 'certifications' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                          {% if request.resolver_match.url_name == 'certifications' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                    <i class="ph-bold ph-certificate text-xl"></i> Certifications
+                </a>
+
+                <a href="{% url 'profile_hub' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                          {% if request.resolver_match.url_name == 'profile_hub' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                    <i class="ph-bold ph-gear text-xl"></i> Settings
+                </a>
+
+                <a href="{% url 'kids_mode' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                          {% if request.resolver_match.url_name == 'kids_mode' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                    <i class="ph-bold ph-smiley text-xl"></i> Kids Mode
+                </a>
+
+                <a href="{% url 'rewards_vault' %}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-full font-medium transition-colors
+                          {% if request.resolver_match.url_name == 'rewards_vault' %}active-nav{% else %}text-gray-500 hover:text-eduhive-accent hover:bg-gray-50{% endif %}">
+                    <i class="ph-bold ph-trophy text-xl"></i> Rewards
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- ── Light / Dark Toggle ─────────────────────── -->
+            <div class="pt-4 pb-2">
+                <div class="px-2 py-2 text-xs font-semibold text-gray-400 tracking-wider mb-2 sidebar-section-title">MODE</div>
+                <div class="flex" id="theme-toggle">
+                        <button data-theme="light" id="btn-light" type="button"
+                            class="w-1/2 rounded-full py-2 text-center text-sm font-semibold flex items-center justify-center gap-2 transition-all theme-inactive">
+                        <i class="ph-bold ph-moon text-base"></i> Light
+                    </button>
+                    <button data-theme="dark" id="btn-dark" type="button"
+                            class="w-1/2 rounded-full py-2 text-center text-sm font-semibold flex items-center justify-center gap-2 transition-all theme-inactive">
+                        <i class="ph-bold ph-sun text-base"></i> Dark
+                    </button>
+                </div>
+
+                <!-- Streamlined Toggle -->
+                <form method="POST" action="{% url 'toggle_view' %}" class="mt-3 sidebar-collapse-when-narrow">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="w-full text-left text-xs font-medium text-eduhive-muted-light hover:text-eduhive-accent px-2 py-1 transition-colors">
+                        {% if is_streamlined_view %}
+                            <i class="ph-bold ph-eye"></i> Enable Full Layout
+                        {% else %}
+                            <i class="ph-bold ph-eye-slash"></i> Streamlined Layout
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+
+        </nav>
+
+        <!-- Logout -->
+        <div class="p-6 mt-auto border-t border-gray-100 sidebar-logout-wrap">
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="sidebar-footer-link flex items-center gap-3 text-eduhive-muted hover:text-eduhive-accent font-medium transition-colors bg-transparent border-0 p-0 cursor-pointer">
+                    <i class="ph-bold ph-sign-out text-xl"></i> Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- ════════════════════════════════════════════════════════════
+         MAIN CONTENT
+    ════════════════════════════════════════════════════════════ -->
+    <main class="flex-1 w-full flex flex-col h-screen overflow-hidden">
+
+        <!-- Top Nav Bar -->
+        <header class="bg-white dark:bg-[#26282E] px-8 py-5 flex justify-between items-center z-10 shadow-[0_1px_0_#F0E6E3] border-b border-eduhive-border dark:border-[#2F323A] transition-all duration-300">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="min-w-0">
+                <h2 class="text-2xl font-bold text-eduhive-text tracking-tight">{% block header_title %}Dashboard{% endblock %}</h2>
+                <p class="text-sm text-eduhive-muted mt-1 font-medium">{% block page_subtitle %}Let's learn something new today!{% endblock %}</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+
+                <!-- Search -->
+                <form action="{% url 'global_search' %}" method="get" class="relative hidden md:flex items-center">
+                    <input type="text" id="global-search"
+                           name="q"
+                           value="{{ request.GET.q|default:'' }}"
+                           placeholder="Search courses, games..."
+                           class="w-48 pl-9 pr-4 py-2 rounded-full edu-input text-sm text-eduhive-text focus:outline-none focus:ring-2 focus:ring-eduhive-accent/20 focus:border-eduhive-accent/50 transition-all focus:w-64">
+                    <i class="ph-bold ph-magnifying-glass absolute left-3 text-gray-400 text-base"></i>
+                </form>
+
+                <!-- Notification Bell -->
+                <div class="relative w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 cursor-pointer hover:bg-gray-100 transition-colors"
+                     onclick="toggleNotifications()">
+                    <i class="ph-bold ph-bell text-xl"></i>
+                    <div class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-eduhive-accent rounded-full border-2 border-white"></div>
+
+                    <!-- Notifications Dropdown -->
+                    <div id="notifications-panel"
+                         class="hidden absolute top-12 right-0 w-80 bg-white rounded-2xl shadow-card-hover border border-eduhive-border z-50 overflow-hidden">
+                        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+                            <span class="font-semibold text-sm">Notifications</span>
+                            <span class="text-xs text-eduhive-accent cursor-pointer font-medium">Mark all read</span>
+                        </div>
+                        <div class="divide-y divide-gray-50 max-h-72 overflow-y-auto">
+                            <div class="p-4 hover:bg-gray-50 cursor-pointer">
+                                <div class="flex gap-3 items-start">
+                                    <div class="w-8 h-8 rounded-full bg-eduhive-accent/10 flex items-center justify-center flex-shrink-0">
+                                        <i class="ph-bold ph-book-open text-eduhive-accent text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium">New lesson available</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">Python Fundamentals — Chapter 3</p>
+                                        <p class="text-xs text-gray-300 mt-1">2 hours ago</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 hover:bg-gray-50 cursor-pointer">
+                                <div class="flex gap-3 items-start">
+                                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                        <i class="ph-bold ph-trophy text-green-500 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium">Badge unlocked!</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">You earned "First Steps" badge</p>
+                                        <p class="text-xs text-gray-300 mt-1">Yesterday</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 hover:bg-gray-50 cursor-pointer">
+                                <div class="flex gap-3 items-start">
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                                        <i class="ph-bold ph-calendar-check text-purple-500 text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium">Assignment due tomorrow</p>
+                                        <p class="text-xs text-gray-400 mt-0.5">Mathematics — Problem Set 4</p>
+                                        <p class="text-xs text-gray-300 mt-1">1 day left</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 text-center border-t border-gray-100">
+                            <a href="{% url 'calendar' %}" class="text-xs text-eduhive-accent font-semibold hover:underline">
+                                View all in Calendar →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Avatar -->
+                <a href="{% url 'profile_hub' %}"
+                   class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden cursor-pointer border-2 border-white shadow-sm flex-shrink-0 hover:border-eduhive-accent transition-colors">
+                    <img src="https://i.pravatar.cc/150?u={{ user.username }}" alt="Avatar" class="w-full h-full object-cover">
+                </a>
+
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-8 relative" id="main-scroll">
+            {% block content %}{% endblock content %}
+        </div>
+
+    </main>
+
+    <!-- ════════════════════════════════════════════════════════════
+         SCRIPTS
+    ════════════════════════════════════════════════════════════ -->
+    <script>
+    // ── Sidebar collapse ────────────────────────────────────────────────────
+    function isSidebarCollapsible() {
+        return window.matchMedia('(min-width: 768px)').matches;
+    }
+
+    function syncSidebarCollapseUI() {
+        const collapsed = document.body.classList.contains('sidebar-collapsed');
+        const icon = document.getElementById('sidebar-toggle-icon');
+        const btn = document.getElementById('sidebar-toggle-btn');
+        if (icon) {
+            icon.classList.toggle('ph-caret-double-left', !collapsed);
+            icon.classList.toggle('ph-caret-double-right', collapsed);
+        }
+        if (btn) btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        if (btn) btn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Minimize sidebar');
+
+        const tipTargets = document.querySelectorAll(
+            '#app-sidebar nav a, #app-sidebar nav #vr-menu-btn, #app-sidebar .sidebar-footer-link, #app-sidebar nav button[type="submit"]'
+        );
+        tipTargets.forEach(function (el) {
+            if (!el.dataset.sidebarTip) {
+                el.dataset.sidebarTip = el.textContent.replace(/\s+/g, ' ').trim();
+            }
+            if (collapsed && isSidebarCollapsible()) {
+                el.setAttribute('title', el.dataset.sidebarTip);
+            } else {
+                el.removeAttribute('title');
+            }
+        });
+    }
+
+    function setSidebarCollapsed(collapsed, persist) {
+        if (!isSidebarCollapsible()) {
+            document.body.classList.remove('sidebar-collapsed');
+            syncSidebarCollapseUI();
+            return;
+        }
+        document.body.classList.toggle('sidebar-collapsed', collapsed);
+        if (persist !== false) {
+            localStorage.setItem('bk_sidebar_collapsed', collapsed ? 'true' : 'false');
+        }
+        syncSidebarCollapseUI();
+    }
+
+    function toggleSidebarCollapsed() {
+        setSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed'));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        syncSidebarCollapseUI();
+        var toggleBtn = document.getElementById('sidebar-toggle-btn');
+        if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebarCollapsed);
+    });
+
+    window.addEventListener('resize', function () {
+        if (!isSidebarCollapsible()) {
+            document.body.classList.remove('sidebar-collapsed');
+        } else if (localStorage.getItem('bk_sidebar_collapsed') === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+        syncSidebarCollapseUI();
+    });
+
+    // ── VR Submenu ──────────────────────────────────────────────────────────
+    function toggleVRMenu() {
+        const submenu = document.getElementById('vr-submenu');
+        const caret   = document.getElementById('vr-caret');
+        submenu.classList.toggle('open');
+        caret.style.transform = submenu.classList.contains('open') ? 'rotate(180deg)' : '';
+    }
+
+    // Auto-open VR menu if on a VR page
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlName = "{{ request.resolver_match.url_name }}";
+        if (urlName.startsWith('vr_')) {
+            const submenu = document.getElementById('vr-submenu');
+            const caret   = document.getElementById('vr-caret');
+            if (submenu) {
+                submenu.classList.add('open');
+                if (caret) caret.style.transform = 'rotate(180deg)';
+            }
+        }
+        applyStoredTheme();
+    });
+
+    // ── Notifications Panel ─────────────────────────────────────────────────
+    function toggleNotifications() {
+        const panel = document.getElementById('notifications-panel');
+        panel.classList.toggle('hidden');
+    }
+    // Close notifications when clicking outside
+    document.addEventListener('click', function (e) {
+        const panel = document.getElementById('notifications-panel');
+        const bell  = panel?.closest('[onclick]');
+        if (panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && e.target !== bell) {
+            panel.classList.add('hidden');
+        }
+    });
+
+    // ── Light / Dark Theme ──────────────────────────────────────────────────
+    function setTheme(theme) {
+        localStorage.setItem('theme', theme);
+        applyTheme(theme);
+    }
+
+    function applyTheme(theme) {
+        const btnLight = document.getElementById('btn-light');
+        const btnDark  = document.getElementById('btn-dark');
+        const active   = 'theme-active';
+        const inactive = 'theme-inactive';
+
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+
+        if (btnLight) btnLight.classList.remove(active, inactive);
+        if (btnDark) btnDark.classList.remove(active, inactive);
+
+        if (theme === 'dark') {
+            if (btnDark) btnDark.classList.add(active);
+            if (btnLight) btnLight.classList.add(inactive);
+        } else {
+            if (btnLight) btnLight.classList.add(active);
+            if (btnDark) btnDark.classList.add(inactive);
+        }
+    }
+
+    function applyStoredTheme() {
+        const stored = localStorage.getItem('theme');
+        const theme = stored || 'light';
+        applyTheme(theme);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const themeToggle = document.getElementById('theme-toggle');
+        if (!themeToggle) return;
+
+        themeToggle.addEventListener('click', function (event) {
+            const button = event.target.closest('button[data-theme]');
+            if (!button) return;
+            setTheme(button.dataset.theme);
+        });
+    });
+
+    // ── Global Search (basic client-side) ───────────────────────────────────
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
